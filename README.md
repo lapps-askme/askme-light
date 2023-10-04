@@ -1,13 +1,13 @@
 # AskMe Python
 
-Experiments with getting all of AskMe into Python.
+Experiments with getting AskMe components into Python.
 
 Components that we had in Java:
 
-- Interface to ElasticSearch
+- Interface to ElasticSearch, including Stanford CoreNLP
 - Query component
 - Ranking component
-- AskMe API
+- AskMe API (the old website)
 
 In addition there is the React web site, which will probably not be ported.
 
@@ -20,6 +20,7 @@ Python requirements:
 $ pip install spacy
 $ python -m spacy download en_core_web_sm
 $ pip install elasticsearch
+$ pip install fastapi uvicorn
 ```
 
 Having ElasticSearch set up:
@@ -31,6 +32,12 @@ $ docker run -d --rm -p 9200:9200 \
 ```
 
 ## Running
+
+Running the API:
+
+```bash
+$ uvicorn api:app --reload
+```
 
 
 
