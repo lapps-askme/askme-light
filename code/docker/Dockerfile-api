@@ -1,0 +1,9 @@
+FROM askme-base
+
+WORKDIR app
+
+RUN pip install fastapi==0.103.2 uvicorn==0.23.2
+
+ADD ./ ./
+
+CMD ["uvicorn", "api:app"]
