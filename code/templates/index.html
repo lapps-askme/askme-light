@@ -27,12 +27,13 @@
     <p>Printing {{result.hits_returned}} of {{result.total_hits}} hits </p>
     
     <table cellpadding="10" cellspacing="0" border="1">
-    {% for hit in hits %}
+    {% for doc in docs %}
+    {% set id = doc.identifier %}
       <tr valign="top">
-    	  <td><a href="/document?index={{index}}&doc_id={{hit['_id']}}">{{ hit['_id'] }}</a></td>
-        <td align="right">{{ "%.4f" % hit['_score'] }}</td>
-        <td>{{ hit['_source']['year'] }}</td>
-        <td>{{ hit['_source']['title'] }}</td>
+    	  <td><a href="/document?index={{index}}&doc_id={{id}}">{{id}}</a></td>
+        <td align="right">{{ "%.4f" % doc.score }}</td>
+        <td>{{ doc.year }}</td>
+        <td>{{ doc.title }}</td>
       </tr>
     {% endfor %}
   	</table>

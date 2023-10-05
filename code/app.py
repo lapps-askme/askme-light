@@ -11,22 +11,22 @@ def index():
     index = request.args.get("index")
     term = request.args.get("term", '')
     result = None
-    hits = []
+    docs = []
     if index and term:
         result = elastic.search(index, term)
-        hits = result.hits
-        hits = ranking.rerank(hits)
+        docs = result.hits
+        docs = ranking.rerank(docs)
     return render_template(
         'index.html', indices=elastic.indices(),
-        index=index,term=term, result=result, hits=hits)
+        index=index,term=term, result=result, docs=docs)
 
 @app.route("/document")
 def get_document():
     index = request.args.get("index")
     doc_id = request.args.get("doc_id")
     result = elastic.get_document(index, doc_id)
-    source = result.hits[0]['_source'] if result.total_hits else {} 
-    return render_template('document.html', index=index, doc_id=doc_id, source=source)
+    doc = result.hits[0] if result.total_hits else None
+    return render_template('document.html', index=index, doc_id=doc_id, doc=doc)
 
 @app.route("/related", methods=['POST'])
 def get_related():

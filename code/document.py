@@ -8,11 +8,15 @@ class Document():
 		self.year = hit['_source'].get('year')
 		self.title = hit['_source'].get('title', '')
 		self.authors = hit['_source'].get('authors', [])
-		self.abstract = hit['_source'].get('abstract', '')[:250]
-		self.text = hit['_source'].get('text', '')[:250]
+		# take the summary of the abstract and text, to cut down the size of the
+		# object returned
+		self.abstract = hit['_source'].get('abstract_summary', '')
+		self.text = hit['_source'].get('text_summary', '')
+		self.entities = hit['_source'].get('entities')
 
 	def __str__(self):
-		return f'<Document id={self.identifier} score={self.score:.4f} year={self.year} title={self.title[:40]}'
+		return (f'<Document id={self.identifier} score={self.score:.4f}' \
+				+ f' year={self.year} title={self.title[:40]}')
 
 	def __len__(self):
 		return len(self.abstract) + len(self.text)
@@ -24,5 +28,15 @@ class Document():
 		print()
 
 	def as_json(self):
-		pass
+		return {
+			'identifier': self.identifier,
+			'score': self.score,
+			'topic': self.topic,
+			'year': self.year,
+			'title': self.title,
+			'authors': self.authors,
+			'abstract': self.abstract,
+			'text': self.text,
+			'entities': self.entities
+		}
 		

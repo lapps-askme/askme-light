@@ -21,11 +21,12 @@
     <p/>
 
     <table cellpadding="10" cellspacing="0" border="1">
-    {% for hit in result.hits[:10] %}
+    {% for doc in result.hits[:10] %}
+    {% set id = doc.identifier %}
       <tr>
-        <td align="right">{{"%.4f" % hit['_score']}}</td>
-        <td><a href="/document?index={{index}}&doc_id={{hit['_id']}}">{{ hit['_id'] }}</a></td>
-        <td>{{hit['_source']['title']}}</td>
+        <td align="right">{{"%.4f" % doc.score}}</td>
+        <td><a href="/document?index={{index}}&doc_id={{id}}">{{id}}</a></td>
+        <td>{{doc.title}}</td>
       </tr>
     {% endfor %}
     </table>

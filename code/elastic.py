@@ -3,7 +3,7 @@ import sys, warnings
 from elasticsearch import Elasticsearch, ElasticsearchWarning
 
 import config
-import document
+from document import Document
 
 
 # Suppressing the security warning
@@ -46,8 +46,8 @@ class SearchResult:
 		self.shards = self.response['_shards']
 		self.total_hits = self.response['hits']['total']['value']
 		self.hits_returned = len(self.response['hits']['hits'])
-		self.hits = self.response['hits']['hits']
-		self.compress()
+		self.hits = [Document(hit) for hit in self.response['hits']['hits']]
+		#self.compress()
 
 	def __str__(self):
 		return f'<SearchResult with {self.hits_returned}/{self.total_hits} results>'
@@ -55,7 +55,7 @@ class SearchResult:
 	def __len__(self):
 		return self.hits_returned
 
-	def compress(self):
+	def xcompress(self):
 		"""Compress the result by returning just the abstract and text summaries and not
 		the full abstract and text. This also updates the raw elastic response as a side
 		effect."""
@@ -68,10 +68,8 @@ class SearchResult:
 
 def test(term: str):
 	result = search('xdd-bio', term)
-	print(len(result.hits))
-	docs = [document.Document(hit) for hit in result.hits]
-	for doc in docs:
-		print(doc.identifier, len(doc), doc.title[:75])
+	for n, doc in enumerate(result.hits):
+		print(f'{n:2}  {doc.identifier}  {len(doc):4}  {doc.title[:75]}')
 
 
 if __name__ == '__main__':
