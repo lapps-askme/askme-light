@@ -52,8 +52,8 @@ class SearchResult:
 	def __str__(self):
 		return f'<SearchResult with {self.hits_returned}/{self.total_hits} results>'
 
-	def number_of_hits(self):
-		return result
+	def __len__(self):
+		return self.hits_returned
 
 	def compress(self):
 		"""Compress the result by returning just the abstract and text summaries and not

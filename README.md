@@ -1,18 +1,9 @@
 # AskMe Python
 
-Experiments with getting AskMe components into Python.
-
-Components that we had in Java:
-
-- Interface to ElasticSearch, including Stanford CoreNLP
-- Query component
-- Ranking component
-- AskMe API (the old website)
-
-In addition there is the React web site, which will probably not be ported.
+Creating a light-weight API and Flask application for AskMe.
 
 
-## Requirements
+### Requirements
 
 Python requirements:
 
@@ -20,10 +11,10 @@ Python requirements:
 $ pip install spacy
 $ python -m spacy download en_core_web_sm
 $ pip install elasticsearch
-$ pip install fastapi uvicorn
+$ pip install fastapi uvicorn flask
 ```
 
-Having ElasticSearch set up:
+Starting ElasticSearch:
 
 ```bash
 $ docker run -d --rm -p 9200:9200 \
@@ -31,13 +22,30 @@ $ docker run -d --rm -p 9200:9200 \
 	--user elasticsearch elastic:v1
 ```
 
-## Running
+One time database population:
 
-Running the API:
+```bash
+$ curl http://localhost:9200/xdd-bio/_doc/_bulk -o /dev/null \
+    -H "Content-Type: application/json" -X POST --data-binary @elastic-biomedical.json
+$ curl http://localhost:9200/xdd-geo/_doc/_bulk -o /dev/null \
+    -H "Content-Type: application/json" -X POST --data-binary @elastic-geoarchive.json
+$ curl http://localhost:9200/xdd-mol/_doc/_bulk -o /dev/null \
+    -H "Content-Type: application/json" -X POST --data-binary @elastic-molecular_physics.json
+```
+
+This uses the data created by `prepare_elastic.py` in [https://github.com/lapps-xdd/xdd-processing](https://github.com/lapps-xdd/xdd-processing).
+
+
+### Running
+
+Running the API on [http://localhost:8000/](http://localhost:8000/):
 
 ```bash
 $ uvicorn api:app --reload
 ```
 
+Running the Flask application on [http://localhost:8000/](http://localhost:8000/):
 
-
+```bash
+$ python app.py
+```

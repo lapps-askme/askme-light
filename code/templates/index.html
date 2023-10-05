@@ -1,0 +1,48 @@
+<html>
+
+  <body>
+
+    <h3>AskMe</h3>
+
+    <form action="/" method="get">
+
+      <p>
+      {% for index in indices %}
+      {% set checked = ' checked' if index == 'xdd-bio' else '' %}
+      <input type="radio" id={{index}} name="index" value={{index}} {{checked}}>
+      <label for={{index}}>{{index}}</label>&nbsp;&nbsp;
+      {% endfor %}
+      </p>
+
+      <p>Search term: <input type="text" name="term" value={{term}}></p>
+
+      <p><input type="submit" style="display:none;"></p>
+
+    </form>
+	
+    {% if result %}
+
+    <h4>Results</h4>
+
+    <p>Printing {{result.hits_returned}} of {{result.total_hits}} hits </p>
+    
+    <table cellpadding="10" cellspacing="0" border="1">
+    {% for hit in hits %}
+      <tr valign="top">
+    	  <td><a href="/document?index={{index}}&doc_id={{hit['_id']}}">{{ hit['_id'] }}</a></td>
+        <td align="right">{{ "%.4f" % hit['_score'] }}</td>
+        <td>{{ hit['_source']['year'] }}</td>
+        <td>{{ hit['_source']['title'] }}</td>
+      </tr>
+    {% endfor %}
+  	</table>
+
+    {% else %}
+    
+    <p>No results found</p>
+
+    {% endif %}
+
+  </body>
+
+</html>

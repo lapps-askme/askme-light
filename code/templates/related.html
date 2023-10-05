@@ -1,0 +1,35 @@
+<html>
+
+  <body>
+
+    [ <a href="/">home</a> ]
+
+    <h3>AskMe Related Documents</h3>
+
+    <p>Finding related documents, using:</p>
+
+    <table cellpadding="10" cellspacing="0" border="1">
+      <tr valign="top"><td>index</td><td>{{index}}</td></tr>
+      <tr valign="top"><td>title</td><td>{{title}}</td></tr>
+      <!--
+      <tr valign="top"><td>abstract</td><td>{{abstract}}</td></tr>
+      <tr valign="top"><td>text</td><td>{{text}}</td></tr>
+      <tr valign="top"><td>entities</td><td></td></tr>
+      -->
+    </table>
+
+    <p/>
+
+    <table cellpadding="10" cellspacing="0" border="1">
+    {% for hit in result.hits[:10] %}
+      <tr>
+        <td align="right">{{"%.4f" % hit['_score']}}</td>
+        <td><a href="/document?index={{index}}&doc_id={{hit['_id']}}">{{ hit['_id'] }}</a></td>
+        <td>{{hit['_source']['title']}}</td>
+      </tr>
+    {% endfor %}
+    </table>
+
+  </body>
+
+</html>

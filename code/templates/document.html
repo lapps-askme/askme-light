@@ -1,0 +1,56 @@
+<html>
+
+  <body>
+
+    [ <a href="/">home</a> ]
+
+    <h3>AskMe Document</h3>
+
+    <table cellpadding="10" cellspacing="0" border="1">
+    <tr valign="top">
+      <td>document</td>
+      <td>{{index}}:{{source['name'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>title</td>
+      <td>{{source['title'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>year</td>
+      <td>{{source['year'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>authors</td>
+      <td>{{source['authors'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>topic</td>
+      <td>{{source['topic'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>abstract</td>
+      <td>{{source['abstract'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>text</td>
+      <td>{{source['text'] }}</td>
+    </tr>
+    <tr valign="top">
+      <td>entities</td>
+      <td>{{source['entities'] }}</td>
+    </tr>
+    </table>
+
+  <p/>
+
+  <form action="/related" method="post">
+    <input id="index" name="index" style="display:none;" value={{index}}>
+    <textarea id="title" name="title" style="display:none;">{{source['title']}}</textarea>
+    <textarea id="abstract" name="abstract" style="display:none;">{{source['abstract']}}</textarea>
+    <textarea id="text" name="text" style="display:none;">{{source['text']}}</textarea>
+    <input type="submit" value="Get related documents"></p>
+  </form>
+
+  </body>
+
+</html>
