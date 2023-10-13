@@ -1,0 +1,8 @@
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+
+RUN mkdir /data \
+	&& chown elasticsearch /data \
+	&& echo "path.data: /data" >> /usr/share/elasticsearch/config/elasticsearch.yml \
+	&& echo "discovery.type: single-node" >> /usr/share/elasticsearch/config/elasticsearch.yml
+
+CMD bin/elasticsearch
