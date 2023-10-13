@@ -35,6 +35,20 @@
       <td>text</td>
       <td>{{doc.text}}</td>
     </tr>
+    <tr valign="top">
+      <td>terms</td>
+      <td>
+        <table cellspacing="4">
+          {% for term in doc.sorted_terms()[:20] %}
+          <tr>
+            <td>{{ term[0] }}</td>
+            <td align="right">{{ term[1] }}</td>
+            <td>{{ term[2] }}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td>
+    </tr>
     {% for entity_type in doc.entities %}
     <tr>
       <td valign="top">entities&#8209;{{entity_type}}</td>
