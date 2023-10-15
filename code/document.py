@@ -1,5 +1,7 @@
 from operator import itemgetter
 
+from config import SUMMARY_SIZE
+
 
 class Document():
 
@@ -12,8 +14,11 @@ class Document():
 		self.authors = hit['_source'].get('authors', [])
 		# take the summary of the abstract and text, to cut down the size of the
 		# object returned
-		self.abstract = hit['_source'].get('abstract_summary', '')
-		self.text = hit['_source'].get('text_summary', '')
+		full_summary = hit['_source'].get('summary', '')
+		# TODO: this now assumes whitespace is always a space (no newlines) which
+		# may change
+		self.summary = ' '.join(full_summary.split()[:SUMMARY_SIZE])
+		#self.text = hit['_source'].get('text_summary', '')
 		self.entities = hit['_source'].get('entities')
 		self.terms = hit['_source'].get('terms')
 		self.restore_types()

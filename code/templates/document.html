@@ -28,12 +28,9 @@
       <td>{{doc.topic}}</td>
     </tr>
     <tr valign="top">
-      <td>abstract</td>
-      <td>{{doc.abstract}}</td>
-    </tr>
-    <tr valign="top">
-      <td>text</td>
-      <td>{{doc.text}}</td>
+      <!-- only printing the first 1000 characters for now -->
+      <td>summary</td>
+      <td>{{doc.summary[:1000]}}</td>
     </tr>
     <tr valign="top">
       <td>terms</td>
@@ -42,8 +39,10 @@
           {% for term in doc.sorted_terms()[:20] %}
           <tr>
             <td>{{ term[0] }}</td>
+            <td>&nbsp;</td>
             <td align="right">{{ term[1] }}</td>
-            <td>{{ term[2] }}</td>
+            <td>&nbsp;</td>
+            <td>{{ "%.4f" % term[2] }}</td>
           </tr>
           {% endfor %}
         </table>

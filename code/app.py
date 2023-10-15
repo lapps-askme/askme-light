@@ -1,4 +1,4 @@
-
+import time
 from flask import Flask, render_template, request
 
 import elastic
@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
+    t0 = time.time()
     index = request.args.get("index")
     term = request.args.get("term", '')
     result = None
@@ -16,6 +17,7 @@ def index():
         result = elastic.search(index, term)
         docs = result.hits
         docs = ranking.rerank(docs)
+    print(f'Elapsed time: {time.time()-t0:.2f} seconds')
     return render_template(
         'index.html', indices=elastic.indices(),
         index=index,term=term, result=result, docs=docs)
