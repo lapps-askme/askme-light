@@ -3,7 +3,7 @@ import sys, warnings
 from elasticsearch import Elasticsearch, ElasticsearchWarning
 
 import config
-import document
+from document import Document
 
 
 # Suppressing the security warning
@@ -29,6 +29,7 @@ def get_document(index: str, doc_id: str):
 	return SearchResult(result)
 
 def search(index: str, term: str):
+	# TODO: 'term' could be multiple tokens and the search is now a disjunction
 	query = {'multi_match': {'query': term, "fields": ["title", "abstract", "text"]}}
 	result = ES.search(index=index, size=30, query=query)
 	return SearchResult(result)
@@ -46,32 +47,19 @@ class SearchResult:
 		self.shards = self.response['_shards']
 		self.total_hits = self.response['hits']['total']['value']
 		self.hits_returned = len(self.response['hits']['hits'])
-		self.hits = self.response['hits']['hits']
-		self.compress()
+		self.hits = [Document(hit) for hit in self.response['hits']['hits']]
 
 	def __str__(self):
 		return f'<SearchResult with {self.hits_returned}/{self.total_hits} results>'
 
-	def number_of_hits(self):
-		return result
-
-	def compress(self):
-		"""Compress the result by returning just the abstract and text summaries and not
-		the full abstract and text. This also updates the raw elastic response as a side
-		effect."""
-		for hit in self.hits:
-			hit['_source']['abstract'] = hit['_source']['abstract_summary']
-			hit['_source']['text'] = hit['_source']['text_summary']
-			del(hit['_source']['abstract_summary'])
-			del(hit['_source']['text_summary'])
+	def __len__(self):
+		return self.hits_returned
 
 
 def test(term: str):
 	result = search('xdd-bio', term)
-	print(len(result.hits))
-	docs = [document.Document(hit) for hit in result.hits]
-	for doc in docs:
-		print(doc.identifier, len(doc), doc.title[:75])
+	for n, doc in enumerate(result.hits):
+		print(f'{n:2}  {doc.identifier}  {len(doc):4}  {doc.title[:75]}')
 
 
 if __name__ == '__main__':
