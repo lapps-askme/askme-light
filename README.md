@@ -21,7 +21,7 @@ $ docker run -d --rm -p 9200:9200 \
 	-v /Users/Shared/data/elasticsearch/data/:/data \
 	--user elasticsearch elastic:v1
 ```
-See notes below on ElasticSearch on how to create the Elastic image and how to populate the database.
+See below for more details on how to create the Elastic image and how to populate the database.
 
 
 ### Running
@@ -32,11 +32,15 @@ Running the API on [http://localhost:8000/](http://localhost:8000/):
 $ uvicorn api:app --reload
 ```
 
-Running the Flask application on [http://localhost:8000/](http://localhost:8000/):
+Running the Flask application on [http://localhost:5000/](http://localhost:5000/):
 
 ```bash
 $ python app.py
 ```
+
+The FLask application will never look nice, it is just there for development reasons.
+
+When you want to use this from the full AskMe webpage you need to start the Next.js site in [https://github.com/lappsgrid-incubator/askme-web-next](https://github.com/lappsgrid-incubator/askme-web-next). Note that the environment file for that site previously used a Spring Boot API running on port 8080 and that in the current context you want to use 8000.
 
 
 ### Setting up ElasticSearch

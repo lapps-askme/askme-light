@@ -1,6 +1,7 @@
 """
 FastAPI interface to AskMe
 
+$ curl http:/127.0.0.1:8000/search?c=xdd-bio&q=flu
 $ curl http:/127.0.0.1:8000/api
 $ curl http:/127.0.0.1:8000/api/doc/xdd-bio/54b4324ee138239d8684aeb2
 $ curl http:/127.0.0.1:8000/api/doc/xdd-bio/54b4324ee138239d8684aeb2/abstract
@@ -18,6 +19,45 @@ import elastic
 import ranking
 
 app = FastAPI()
+
+
+# The first two were intended to hook up with the Node.js site, but note that the
+# some magic in that site makes sure that only the /question endpoint is used.
+
+@app.get('/search')
+def search(c: str, q: str):
+	print('SEARCH')
+	result = elastic.search(c, q)
+	return {
+		"query": { "question": q },
+		"documents": result.hits,
+		"duration": result.took }
+
+@app.post('/question')
+def search(domain: str, question: str):
+	print('QUESTION')
+	print({"domain": domain, "question": question[:50]})
+	result = elastic.search(domain, question)
+	# We cannot just return the hits as we get them because the client has some
+	# expectations that I did not want to change yet.
+	adapted_hits = []
+	for hit in result.hits:
+		adapted_hits.append({
+			"id": hit.identifier,
+			"title": {"text": hit.title},
+			"articleAbstract": {"text": hit.summary},
+			"score": hit.score,
+			"nscore": hit.score,
+			"url": hit.url
+			})
+	return {
+		"query": { "question": question },
+		"documents": adapted_hits,
+		"duration": result.took }
+
+
+# More general ones, may want to merge the above into here, but requires some 
+# changes to askme-web-next
 
 @app.get('/api')
 def home():

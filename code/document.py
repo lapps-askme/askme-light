@@ -8,9 +8,11 @@ class Document():
 	def __init__(self, hit: dict):
 		self.identifier = hit['_id']
 		self.score = hit['_score']
+		self.nscore = hit['_score']
 		self.topic = hit['_source'].get('topic')
 		self.year = hit['_source'].get('year')
 		self.title = hit['_source'].get('title', '')
+		self.url = hit['_source'].get('url', '')
 		self.authors = hit['_source'].get('authors', [])
 		# take the summary of the abstract and text, to cut down the size of the
 		# object returned
@@ -18,7 +20,6 @@ class Document():
 		# TODO: this now assumes whitespace is always a space (no newlines) which
 		# may change
 		self.summary = ' '.join(full_summary.split()[:SUMMARY_SIZE])
-		#self.text = hit['_source'].get('text_summary', '')
 		self.entities = hit['_source'].get('entities')
 		self.terms = hit['_source'].get('terms')
 		self.restore_types()
@@ -50,9 +51,11 @@ class Document():
 		return {
 			'identifier': self.identifier,
 			'score': self.score,
+			'nscore': self.score,
 			'topic': self.topic,
 			'year': self.year,
 			'title': self.title,
+			'url': self.url,
 			'authors': self.authors,
 			'abstract': self.abstract,
 			'text': self.text,

@@ -24,6 +24,7 @@ def index():
 
 @app.route("/document")
 def get_document():
+    # TODO: this gives an error if the document does not exist
     index = request.args.get("index")
     doc_id = request.args.get("doc_id")
     result = elastic.get_document(index, doc_id)
