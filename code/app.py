@@ -3,6 +3,7 @@ from flask import Flask, render_template, request
 
 import elastic
 import ranking
+import document
 
 app = Flask(__name__)
 
@@ -29,8 +30,17 @@ def get_document():
     doc_id = request.args.get("doc_id")
     result = elastic.get_document(index, doc_id)
     doc = result.hits[0] if result.total_hits else None
+
     return render_template('document.html', index=index, doc_id=doc_id, doc=doc)
 
+@app.route("/set")
+def get_set():
+    index = request.args.get("index")
+    doc_ids = [identifier for identifier in request.args if not identifier == 'index']
+    result = elastic.get_documents(index, doc_ids)
+    doc_set = document.DocumentSet(result.hits)
+    return render_template('set.html', docs=doc_set.documents, terms=doc_set.get_terms())
+    
 @app.route("/related", methods=['POST'])
 def get_related():
     index = request.form.get("index")

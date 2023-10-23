@@ -1,0 +1,28 @@
+<html>
+
+  <body>
+
+    [ <a href="/">home</a> ]
+
+    <h3>AskMe Document Set</h3>
+
+    <table cellpadding="10" cellspacing="0" border="1">
+    {% for doc in docs %}
+    {% set id = doc.identifier %}
+      <tr>
+        <!--<td align="right">{{"%.4f" % doc.score}}</td>-->
+        <td><a href="/document?index={{index}}&doc_id={{id}}">{{id}}</a></td>
+        <td>{{doc.title}}</td>
+      </tr>
+    {% endfor %}
+    </table>
+
+    <p/>
+    
+    {% for term in terms %}
+    <pre>{{term}}</pre>
+    {% endfor %}
+
+  </body>
+
+</html>

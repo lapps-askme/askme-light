@@ -25,41 +25,63 @@ def settings(index='*'):
 
 def get_document(index: str, doc_id: str):
 	query = {'match': {'_id': doc_id}}
-	result = ES.search(index=index, size=30, query=query)
+	result = ES.search(index=index, size=config.MAX_RESULTS, query=query)
+	return SearchResult(result)
+
+def get_documents(index: str, doc_ids: list):
+	result = ES.mget(
+		index=index,
+		body={'ids': doc_ids},
+		source_excludes=['abstract', 'text'])
 	return SearchResult(result)
 
 def search(index: str, term: str):
 	# TODO: 'term' could be multiple tokens and the search is now a disjunction
 	query = {'multi_match': {'query': term, "fields": ["title", "abstract", "text"]}}
-	result = ES.search(index=index, size=30, query=query)
+	result = ES.search(index=index, size=config.MAX_RESULTS, query=query)
 	return SearchResult(result)
 
 
 class SearchResult:
 
-	"""Convenience wrapper around the response from ElasticSearch."""
+	"""Convenience wrapper around the response from ElasticSearch. Note that the
+	response is different depending on whether we called ES.mget() or ES.search()."""
 
 	def __init__(self, elastic_response):
 		# elastic_response is of type elastic_transport.ObjectApiResponse
 		self.response = elastic_response
-		self.took = self.response['took']
-		self.timed_out = self.response['timed_out']
-		self.shards = self.response['_shards']
-		self.total_hits = self.response['hits']['total']['value']
-		self.hits_returned = len(self.response['hits']['hits'])
-		self.hits = [Document(hit) for hit in self.response['hits']['hits']]
+		self.took = self.response.get('took')
+		self.timed_out = self.response.get('timed_out')
+		self.shards = self.response.get('_shards')
+		self.hits = self._get_hits()
+		self.hits_returned = len(self.hits)
+		self.total_hits = self._get_total_hits()
 
 	def __str__(self):
-		return f'<SearchResult with {self.hits_returned}/{self.total_hits} results>'
+		return f'<SearchResult with {self.hits_returned}/{self.total_hits} hits>'
 
 	def __len__(self):
 		return self.hits_returned
+
+	def _get_hits(self):
+		if 'docs' in self.response:
+			hits = self.response['docs']
+		else:
+			hits = self.response['hits']['hits']
+		# NOTE: should perhaps return a DocumentSet
+		return [Document(hit) for hit in hits]
+
+	def _get_total_hits(self):
+		if 'docs' in self.response:
+			return self.hits_returned
+		else:
+			return self.response['hits']['total']['value']
 
 
 def test(term: str):
 	result = search('xdd-bio', term)
 	for n, doc in enumerate(result.hits):
-		print(f'{n:2}  {doc.identifier}  {len(doc):4}  {doc.title[:75]}')
+		print(f'{n+1:2}  {doc.identifier}  {doc.title[:75]}')
 
 
 if __name__ == '__main__':
