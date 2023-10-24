@@ -56,7 +56,9 @@ class Document():
 			"articleAbstract": {"text": self.summary},
 			"score": self.score,
 			"nscore": self.score,
-			"url": self.url }
+			"url": self.url,
+			"entities": self.entities,
+			"terms": self.terms }
 
 	def display_fields(self):
 		"""Return a list of fields to be displayed in the Flask application. Each field
