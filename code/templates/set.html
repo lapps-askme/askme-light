@@ -19,9 +19,23 @@
 
     <p/>
     
-    {% for term in terms %}
-    <pre>{{term}}</pre>
-    {% endfor %}
+    <table cellpadding="10" cellspacing="0" border="1">
+      <tr>
+        <td valign="top">Salient terms</td>
+        <td valign="top">
+          <table>
+          {% for tfidf, freq, term in terms[:20] %}
+          <tr>
+            <td>{{term}}</td>
+            <td>&nbsp;</td>
+            <td align="right">{{freq}}</td>
+            <td>&nbsp;</td>
+            <td>{{"%.4f" % tfidf}}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td>
+    </table>
 
   </body>
 

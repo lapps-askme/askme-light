@@ -2,6 +2,7 @@
 FastAPI interface to AskMe
 
 $ curl http:/127.0.0.1:8000/search?c=xdd-bio&q=flu
+$ curl http:/127.0.0.1:8000/question?domain=xdd-bio&query=flu
 $ curl http:/127.0.0.1:8000/api
 $ curl http:/127.0.0.1:8000/api/doc/xdd-bio/54b4324ee138239d8684aeb2
 $ curl http:/127.0.0.1:8000/api/doc/xdd-bio/54b4324ee138239d8684aeb2/abstract
@@ -15,49 +16,17 @@ $ curl http:/127.0.0.1:8000/api/search/xdd-bio/particle
 
 import json
 from fastapi import FastAPI
+import elasticsearch
 import elastic
 import ranking
+from utils import error
+
+
+DEBUG = True
+
 
 app = FastAPI()
 
-
-# The first two were intended to hook up with the Node.js site, but note that the
-# some magic in that site makes sure that only the /question endpoint is used.
-
-@app.get('/search')
-def search(c: str, q: str):
-	print('SEARCH')
-	result = elastic.search(c, q)
-	return {
-		"query": { "question": q },
-		"documents": result.hits,
-		"duration": result.took }
-
-@app.post('/question')
-def search(domain: str, question: str):
-	print('QUESTION')
-	print({"domain": domain, "question": question[:50]})
-	result = elastic.search(domain, question)
-	# We cannot just return the hits as we get them because the client has some
-	# expectations that I did not want to change yet.
-	adapted_hits = []
-	for hit in result.hits:
-		adapted_hits.append({
-			"id": hit.identifier,
-			"title": {"text": hit.title},
-			"articleAbstract": {"text": hit.summary},
-			"score": hit.score,
-			"nscore": hit.score,
-			"url": hit.url
-			})
-	return {
-		"query": { "question": question },
-		"documents": adapted_hits,
-		"duration": result.took }
-
-
-# More general ones, may want to merge the above into here, but requires some 
-# changes to askme-web-next
 
 @app.get('/api')
 def home():
@@ -65,9 +34,42 @@ def home():
 		"description": "AskMe API",
 		"indices": elastic.indices() }
 
+@app.post('/api/question')
+def query(domain: str, question: str):
+	"""Intended as an endpoint for the current web interface."""
+	print({"domain": domain, "question": question[:50]})
+	try:
+		result = elastic.search(domain, question)
+		print('>>>', result)
+		return {
+			"status": "succes",
+			"query": { "question": question },
+			"documents": [doc.as_json_for_gui() for doc in result.hits],
+			"duration": result.took }
+	except elasticsearch.NotFoundError as e:
+		return error(
+			"elasticsearch.NotFoundError",
+			f"Index {domain} does not exist",
+			DEBUG)
+
+@app.get('/api/search')
+def search(c: str, q: str):
+	"""Intended as an endpoint for the current web interface. But note that
+	some magic in that site makes sure that only the /api/question endpoint is
+	used, this one is probably deprecated."""
+	try:
+		result = elastic.search(c, q)
+		return {
+			"status": "success",
+			"query": { "index": c, "question": q },
+			"documents": result.hits,
+			"duration": result.took }
+	except Exception as e:
+		return error(e.__class__.__name__, e.message, DEBUG)
+
 @app.get('/api/search/{index}/{term}')
 def search(index: str, term: str):
-	"""Returns the the documents as JSON objects."""
+	"""Returns the documents as JSON objects."""
 	result = elastic.search(index, term)
 	return ranking.rerank(result.hits)
 

@@ -44,8 +44,8 @@ def search(index: str, term: str):
 
 class SearchResult:
 
-	"""Convenience wrapper around the response from ElasticSearch. Note that the
-	response is different depending on whether we called ES.mget() or ES.search()."""
+	"""Convenience wrapper around the response from ElasticSearch. The response is
+	different depending on whether we called ES.mget() or ES.search()."""
 
 	def __init__(self, elastic_response):
 		# elastic_response is of type elastic_transport.ObjectApiResponse

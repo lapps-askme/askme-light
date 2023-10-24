@@ -47,6 +47,17 @@ class Document():
 	def as_json(self):
 		return { field: getattr(self, field) for field in FIELDS }
 
+	def as_json_for_gui(self):
+		"""This returns the JSON that is expected by the web interface. Notice how
+		some extra structure is required."""
+		return {
+			"id": self.identifier,
+			"title": {"text": self.title},
+			"articleAbstract": {"text": self.summary},
+			"score": self.score,
+			"nscore": self.score,
+			"url": self.url }
+
 	def display_fields(self):
 		"""Return a list of fields to be displayed in the Flask application. Each field
 		is a tuple of a field name and field value."""
@@ -77,8 +88,17 @@ class DocumentSet:
 		return f'<DocumentSet with {len(self)} documents>'
 
 	def get_terms(self):
-		terms = []
+		"""To get the terms of a set, with their frequencies and TFIDF scores, we
+		just collect all of them and sum the frequencies and TFIDF scores. This
+		definitely makes sense for the frequencies, but for the TFIDF scores we do
+		end up with something that is not really a TFIDF score. The resulting list
+		of (TFIDF, frequency, term) tuple is sorted on TFIDF scores."""
+		terms = {}
 		for doc in self.documents:
 			for term in doc.terms:
-				terms.append(term)
-		return terms
+				if not term[0] in terms:
+					terms[term[0]] = [0,0]
+					terms[term[0]][0] += term[1]
+					terms[term[0]][1] += term[2]
+		return list(reversed(sorted(
+				[(tfidf, freq, term) for term, (freq, tfidf) in terms.items()])))
