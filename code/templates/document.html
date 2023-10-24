@@ -7,35 +7,16 @@
     <h3>AskMe Document</h3>
 
     <table cellpadding="10" cellspacing="0" border="1">
+
+    <!-- printing the atomic document fields -->
+    {% for field_name, field_value in doc.display_fields() %}
     <tr valign="top">
-      <td>document</td>
-      <td>{{index}}:{{doc.identifier}}</td>
+      <td>{{field_name}}</td>
+      <td>{{field_value | safe}}</td>
     </tr>
-    <tr valign="top">
-      <td>title</td>
-      <td>{{doc.title}}</td>
-    </tr>
-    <tr valign="top">
-      <td>year</td>
-      <td>{{doc.year}}</td>
-    </tr>
-    <tr valign="top">
-      <td>url</td>
-      <td><a href="{{doc.url}}">{{doc.url}}</a></td>
-    </tr>
-    <tr valign="top">
-      <td>authors</td>
-      <td>{{doc.authors}}</td>
-    </tr>
-    <tr valign="top">
-      <td>topic</td>
-      <td>{{doc.topic}}</td>
-    </tr>
-    <tr valign="top">
-      <!-- only printing the first 1000 characters for now -->
-      <td>summary</td>
-      <td>{{doc.summary[:1000]}}</td>
-    </tr>
+    {% endfor %}
+
+    <!-- printing the terms -->
     <tr valign="top">
       <td>terms</td>
       <td>
@@ -52,16 +33,25 @@
         </table>
       </td>
     </tr>
-    {% for entity_type in doc.entities %}
+
+
     <tr>
-      <td valign="top">entities&#8209;{{entity_type}}</td>
+      <td valign="top">entities</td>
       <td>
-        {% for entity, count in doc['entities'][entity_type] %}
-        [{{entity}}] &nbsp;
+        <table>
+        {% for entity_type in doc.entities %}
+        <tr>
+          <td valign="top">{{entity_type}}</td>
+          <td valign="top">&nbsp;</td>
+          <td>
+            {% for entity, count in doc['entities'][entity_type] %}
+            [{{entity}}]&nbsp;
+            {% endfor %}
         {% endfor %}
+        </table>
       </td>
     </tr>
-    {% endfor %}
+
     </table>
 
   <p/>
@@ -71,7 +61,7 @@
     <textarea id="title" name="title" style="display:none;">{{doc['title']}}</textarea>
     <textarea id="abstract" name="abstract" style="display:none;">{{doc['abstract']}}</textarea>
     <textarea id="text" name="text" style="display:none;">{{doc['text']}}</textarea>
-    <input type="submit" value="Get related documents"></p>
+    <input type="submit" value="Related documents"></p>
   </form>
 
   </body>

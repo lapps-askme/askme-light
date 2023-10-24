@@ -26,17 +26,23 @@
 
     <p>Printing {{result.hits_returned}} of {{result.total_hits}} hits </p>
     
-    <table cellpadding="10" cellspacing="0" border="1">
-    {% for doc in docs %}
-    {% set id = doc.identifier %}
-      <tr valign="top">
-    	  <td><a href="/document?index={{index}}&doc_id={{id}}">{{id}}</a></td>
-        <td align="right">{{ "%.4f" % doc.score }}</td>
-        <td>{{ doc.year }}</td>
-        <td>{{ doc.title }}</td>
-      </tr>
-    {% endfor %}
-  	</table>
+    <form action="set" method="get">
+      <p>{{index}}</p>
+      <input type="hidden" name="index" value={{index}}>
+      <table cellpadding="10" cellspacing="0" border="1">
+      {% for doc in docs %}
+      {% set id = doc.identifier %}
+        <tr valign="top">
+          <td><input type="checkbox" name="{{id}}"/></td>
+    	    <td><a href="/document?index={{index}}&doc_id={{id}}">{{id}}</a></td>
+          <td align="right">{{ "%.4f" % doc.score }}</td>
+          <td>{{ doc.year }}</td>
+          <td>{{ doc.title }}</td>
+        </tr>
+      {% endfor %}
+      </table>
+      <p><input type="submit"/></p> 
+    </form>
 
     {% else %}
     

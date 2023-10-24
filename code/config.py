@@ -10,3 +10,11 @@ SUMMARY_SIZE = 500
 # to be a good cut off, with benefits in evaluation most pronounced over the first
 # 20 documents.
 MAX_DOCUMENTS_FOR_NLP = 20
+
+# maximum number of results to print
+MAX_RESULTS = 20
+
+# List of fields to be included in the document when the API requests it
+FIELDS = (
+	'identifier', 'score', 'nscore', 'topic', 'year', 'title', 'url',
+	'authors', 'summary', 'terms', 'entities')
