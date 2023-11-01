@@ -5,6 +5,8 @@ from config import SUMMARY_SIZE, FIELDS
 
 class Document():
 
+	"""Object created from a hit in the ElasticSearch response."""
+
 	def __init__(self, hit: dict):
 		self.identifier = hit['_id']
 		self.score = hit.get('_score', 0)
@@ -49,7 +51,8 @@ class Document():
 
 	def as_json_for_gui(self):
 		"""This returns the JSON that is expected by the web interface. Notice how
-		some extra structure is required."""
+		some extra structure is required. This is now deprecated and will be removed
+		rather soon."""
 		return {
 			"id": self.identifier,
 			"title": {"text": self.title},

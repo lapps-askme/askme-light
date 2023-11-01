@@ -30,7 +30,6 @@ def get_document():
     doc_id = request.args.get("doc_id")
     result = elastic.get_document(index, doc_id)
     doc = result.hits[0] if result.total_hits else None
-
     return render_template('document.html', index=index, doc_id=doc_id, doc=doc)
 
 @app.route("/set")
