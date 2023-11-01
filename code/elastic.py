@@ -35,7 +35,7 @@ def get_documents(index: str, doc_ids: list):
 		source_excludes=['abstract', 'text'])
 	return SearchResult(result)
 
-def search(index: str, term: str, page: int):
+def search(index: str, term: str, page: int=1):
 	# TODO: 'term' could be multiple tokens and the search is now a disjunction
 	query = {'multi_match': {'query': term, "fields": ["title", "abstract", "text"]}}
 	# offset for documents returned
