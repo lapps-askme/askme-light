@@ -14,6 +14,11 @@ MAX_DOCUMENTS_FOR_NLP = 20
 # maximum number of results to print
 MAX_RESULTS = 20
 
+# maximum number of pages allowed for pagination
+# elastic sets a default maxiumum of 10,000 document offset allowed
+# set this as limit for now (need to decide on max pages wanted for performance reasons)
+MAX_PAGES = 40
+
 # List of fields to be included in the document when the API requests it
 FIELDS = (
 	'identifier', 'score', 'nscore', 'topic', 'year', 'title', 'url',
