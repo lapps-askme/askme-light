@@ -19,11 +19,12 @@ $ curl http://localhost:8000/api/set?index=xdd-bio&ids=5783bcafcf58f176c768f5cc,
 
 import json
 from fastapi import FastAPI
+import config
 import elasticsearch
 import elastic
 import ranking
 import document
-from utils import error
+from utils import error, get_valid_pages
 
 
 DEBUG = False
@@ -39,17 +40,21 @@ def home():
         "indices": elastic.indices() }
 
 @app.post('/api/question')
-def query(domain: str, query: str):
+def query(domain: str, query: str, page: int=1):
     """Intended as an endpoint for the current web interface."""
-    print({"domain": domain, "query": query[:50]})
+    # if page number is larger than MAX_PAGES or less than 1, default to 1
+    if page > config.MAX_PAGES or page < 1:
+        page = 1
+    print({"domain": domain, "question": query[:50], "page": page})
     try:
-        result = elastic.search(domain, query)
+        result = elastic.search(domain, query, page)
         print('>>>', result)
         return {
             "status": "succes",
             "query": { "question": query },
             "documents": [doc.as_json() for doc in result.hits],
-            "duration": result.took }
+            "duration": result.took,
+            "pages": get_valid_pages(result.total_hits, page) }
     except elasticsearch.NotFoundError as e:
         return error(
             "elasticsearch.NotFoundError",
