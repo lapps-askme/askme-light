@@ -20,6 +20,9 @@ MAX_RESULTS = 20
 # set this as limit for now (need to decide on max pages wanted for performance reasons)
 MAX_PAGES = 40
 
+# Fields to search when doing a basic text search
+SEARCH_FIELDS = ('title', 'abstract', 'text')
+
 # List of fields to be included in the document when the API requests it
 FIELDS = (
 	'identifier', 'score', 'nscore', 'domain', 'year', 'title', 'url',
