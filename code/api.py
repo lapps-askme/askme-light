@@ -84,7 +84,7 @@ def get_set(ids: str):
     return {
         "status": "succes",
         "query": { "index": INDEX, "ids": ids },
-        "documents": doc_set,
+        "documents": doc_set.documents,
         "terms": doc_set.get_terms() }
 
 @app.get('/api/doc/{doc_id}')
