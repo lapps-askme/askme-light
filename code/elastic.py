@@ -12,9 +12,11 @@ warnings.filterwarnings("ignore", message=open('securitywarning.txt').read().str
 
 
 ES = Elasticsearch([{
-		'host': config.ELASTIC_HOST, 
-		'port': config.ELASTIC_PORT, 
+		'host': config.ELASTIC_HOST,
+		'port': config.ELASTIC_PORT,
 		'scheme': 'http'}])
+
+INDEX = config.ELASTIC_INDEX
 
 
 def indices(index='*'):
@@ -23,24 +25,26 @@ def indices(index='*'):
 def settings(index='*'):
 	return ES.indices.get_settings(index=index)
 
-def get_document(index: str, doc_id: str):
+def get_document(domain: str, doc_id: str):
+	# TODO: rewrite query to include the domain
 	query = {'match': {'_id': doc_id}}
-	result = ES.search(index=index, size=config.MAX_RESULTS, query=query)
+	result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query)
 	return SearchResult(result)
 
-def get_documents(index: str, doc_ids: list):
+def get_documents(doc_ids: list):
 	result = ES.mget(
-		index=index,
+		index=INDEX,
 		body={'ids': doc_ids},
 		source_excludes=['abstract', 'text'])
 	return SearchResult(result)
 
-def search(index: str, term: str, page: int=1):
+def search(domain: str, term: str, page: int=1):
 	# TODO: 'term' could be multiple tokens and the search is now a disjunction
+	# TODO: rewrite query to include the domain
 	query = {'multi_match': {'query': term, "fields": ["title", "abstract", "text"]}}
 	# offset for documents returned
 	skip = config.MAX_RESULTS * (page - 1)
-	result = ES.search(index=index, size=config.MAX_RESULTS, query=query, from_=skip)
+	result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)
 	return SearchResult(result)
 
 
@@ -81,9 +85,9 @@ class SearchResult:
 
 
 def test(term: str):
-	result = search('xdd-bio', term)
+	result = search(None, term)
 	for n, doc in enumerate(result.hits):
-		print(f'{n+1:2}  {doc.identifier}  {doc.title[:75]}')
+		print(f'{n+1:2}  {doc.identifier}  {doc.score:7.4f}  {doc.domain[:3]}  {doc.title[:75]}')
 
 
 if __name__ == '__main__':

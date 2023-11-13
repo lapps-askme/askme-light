@@ -12,6 +12,7 @@ Additions for the AskMe website:
 
 $ curl http:/127.0.0.1:8000/api/search?c=xdd-bio&q=flu
 $ curl -X POST "http:/127.0.0.1:8000/api/question?domain=xdd-bio&query=flu"
+$ curl -X POST "http:/127.0.0.1:8000/api/question?domain=xdd-bio&query=flu&page=2"
 $ curl http://localhost:8000/api/set?index=xdd-bio&ids=5783bcafcf58f176c768f5cc,58102ca2cf58f15425a75367
 
 """
@@ -41,14 +42,16 @@ def home():
 
 @app.post('/api/question')
 def query(domain: str, query: str, page: int=1):
-    """Intended as an endpoint for the current web interface."""
+    """Search endpoint for the current web interface."""
     # if page number is larger than MAX_PAGES or less than 1, default to 1
     if page > config.MAX_PAGES or page < 1:
         page = 1
-    print({"domain": domain, "question": query[:50], "page": page})
+    if DEBUG:
+        print({"domain": domain, "question": query[:50], "page": page})
     try:
         result = elastic.search(domain, query, page)
-        print('>>>', result)
+        if DEBUG:
+            print('>>>', result)
         return {
             "status": "succes",
             "query": { "question": query },
@@ -61,26 +64,11 @@ def query(domain: str, query: str, page: int=1):
             f"Index {domain} does not exist",
             DEBUG)
 
-@app.get('/api/search')
-def search(c: str, q: str):
-    """Intended as an endpoint for the current web interface. But note that
-    some magic in that site makes sure that only the /api/question endpoint is
-    used, this one is probably deprecated."""
-    try:
-        result = elastic.search(c, q)
-        return {
-            "status": "success",
-            "query": { "index": c, "question": q },
-            "documents": result.hits,
-            "duration": result.took }
-    except Exception as e:
-        return error(e.__class__.__name__, e.message, DEBUG)
-
 @app.get('/api/set')
 def get_set(index: str, ids: str):
     doc_ids = [identifier for identifier in ids.split(',')]
     print(index, doc_ids)
-    result = elastic.get_documents(index, doc_ids)
+    result = elastic.get_documents(doc_ids)
     doc_set = document.DocumentSet(result.hits)
     return {
         "status": "succes",

@@ -1,6 +1,7 @@
 
 ELASTIC_HOST = 'localhost'
 ELASTIC_PORT = 9200
+ELASTIC_INDEX = 'xdd'
 
 # Number of tokens we allow in the summary, set to a number that keeps processing
 # of a query below 0.5 seconds.
@@ -21,5 +22,5 @@ MAX_PAGES = 40
 
 # List of fields to be included in the document when the API requests it
 FIELDS = (
-	'identifier', 'score', 'nscore', 'topic', 'year', 'title', 'url',
+	'identifier', 'score', 'nscore', 'domain', 'year', 'title', 'url',
 	'authors', 'summary', 'terms', 'entities')
