@@ -4,6 +4,7 @@ FastAPI interface to AskMe
 Get a document or a particular field of a document:
 
 $ curl http:/127.0.0.1:8000/api/doc/54b4324ee138239d8684aeb2
+$ curl http:/127.0.0.1:8000/api/doc/54b4324ee138239d8684aeb2?pretty=true
 $ curl http:/127.0.0.1:8000/api/doc/54b4324ee138239d8684aeb2/title
 
 Get a list of documents:
@@ -29,7 +30,7 @@ TODO: figure out behavior of last two queries, first gets nothing, second gets a
 
 
 import json
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
 import config
 import elasticsearch
@@ -62,12 +63,13 @@ def query(domain: str = None, query: str = None, page: int=1):
         print({"domain": domain, "question": query[:50], "page": page})
     try:
         result = elastic.search(domain, query, page)
+        result.hits = ranking.rerank(result.hits)
         if DEBUG:
             print('>>>', result)
         return {
             "status": "succes",
             "query": { "question": query },
-            "documents": [doc.as_json() for doc in result.hits],
+            "documents": [doc.as_json(single_doc=False) for doc in result.hits],
             "duration": result.took,
             "pages": get_valid_pages(result.total_hits, page) }
     except elasticsearch.NotFoundError as e:
@@ -88,11 +90,15 @@ def get_set(ids: str):
         "terms": doc_set.get_terms() }
 
 @app.get('/api/doc/{doc_id}')
-def get_document(doc_id: str):
+def get_document(doc_id: str, pretty: bool = False):
     """Return the document source or an empty dictionary if no such document exists."""
     result = elastic.get_document(doc_id)
     if result.total_hits:
-        return result.hits[0].as_json()
+        response = result.hits[0]
+        if pretty:
+            json_str = json.dumps(response.as_json(single_doc=True), indent=2)
+            response = Response(content=json_str, media_type='application/json')
+        return response
     else:
         return {} 
 

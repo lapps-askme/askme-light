@@ -1,6 +1,6 @@
 from operator import itemgetter
 
-from config import SUMMARY_SIZE, FIELDS
+from config import SUMMARY_SIZE, FIELDS_FOR_MULTIPLE_DOCS, FIELDS_FOR_SINGLE_DOC
 
 
 class Document():
@@ -20,8 +20,8 @@ class Document():
 		# take the summary of the abstract and text, to cut down the size of the
 		# object returned
 		full_summary = hit['_source'].get('summary', '')
-		# TODO: this now assumes whitespace is always a space (no newlines) which
-		# may change
+		# TODO: this now assumes whitespace is always a space (no newlines or tabs),
+		# which may change at any time
 		self.summary = ' '.join(full_summary.split()[:SUMMARY_SIZE])
 		self.entities = hit['_source'].get('entities', {})
 		self.terms = hit['_source'].get('terms', [])
@@ -47,22 +47,11 @@ class Document():
 	def sorted_terms(self):
 		return sorted(self.terms, key=itemgetter(2), reverse=True)
 
-	def as_json(self):
-		return { field: getattr(self, field) for field in FIELDS }
-
-	def as_json_for_gui(self):
-		"""This returns the JSON that is expected by the web interface. Notice how
-		some extra structure is required. This is now deprecated and will be removed
-		rather soon."""
-		return {
-			"id": self.identifier,
-			"title": {"text": self.title},
-			"articleAbstract": {"text": self.summary},
-			"score": self.score,
-			"nscore": self.score,
-			"url": self.url,
-			"entities": self.entities,
-			"terms": self.terms }
+	def as_json(self, single_doc=True):
+		"""Fields that are included are different depending whether we are returning
+		the JSON of a single document or wether this document is part of a list."""
+		fields = FIELDS_FOR_SINGLE_DOC if single_doc else FIELDS_FOR_MULITPLE_DOCS
+		return { field: getattr(self, field) for field in fields }
 
 	def display_fields(self):
 		"""Return a list of fields to be displayed in the Flask application. Each field

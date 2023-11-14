@@ -24,6 +24,14 @@ MAX_PAGES = 40
 SEARCH_FIELDS = ('title', 'abstract', 'text')
 
 # List of fields to be included in the document when the API requests it
-FIELDS = (
+# This is used when multiple documents are returned.
+FIELDS_FOR_MULTIPLE_DOCS = (
 	'identifier', 'score', 'nscore', 'domain', 'year', 'title', 'url',
+	'authors', 'summary')
+
+# List of all fields to includes when you request a single document. The scores
+# become irrelevant, but terms and entities are added.
+# is returned.
+FIELDS_FOR_SINGLE_DOC = (
+	'identifier', 'domain', 'year', 'title', 'url',
 	'authors', 'summary', 'terms', 'entities')
