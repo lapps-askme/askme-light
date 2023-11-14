@@ -42,12 +42,13 @@ def search(domain: str, term: str, page: int=1):
     if domain is None:
         query = {'multi_match': {'query': term, "fields": config.SEARCH_FIELDS}}
     else:
+        # Using "must" instead of "should". With the latter document with scores of
+        # zero were making it into the response.
         query = {
             "bool": {
-                "should": {
+                "must": {
                     "multi_match": {"query": term, "fields": config.SEARCH_FIELDS}},
                 "filter": {"term": {"topic": domain} }}}
-
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)
