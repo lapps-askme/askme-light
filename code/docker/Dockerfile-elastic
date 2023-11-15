@@ -1,3 +1,6 @@
+# Dockerfile to build a basic image with ElasticSearch on it. Only use this for local development,
+# there is no security whatsoever.
+
 FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.13
 
 RUN mkdir /data \
