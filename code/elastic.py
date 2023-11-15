@@ -6,15 +6,21 @@ import config
 from document import Document
 
 
-# Suppressing the security warning
+# Suppressing the security warning, this is here in case you run this with an
+# ElasticSearch image that does not have security enabled.
 # warnings.filterwarnings("ignore", category=ElasticsearchWarning)
 warnings.filterwarnings("ignore", message=open('securitywarning.txt').read().strip())
 
 
-ES = Elasticsearch([{
-        'host': config.ELASTIC_HOST,
-        'port': config.ELASTIC_PORT,
-        'scheme': 'http'}])
+# ES = Elasticsearch([{
+#        'host': config.ELASTIC_HOST,
+#        'port': config.ELASTIC_PORT,
+#        'scheme': 'http'}])
+
+ES = Elasticsearch(
+        [f'http://{config.ELASTIC_HOST}:{config.ELASTIC_PORT}'],
+        http_auth=(config.ELASTIC_USER, config.ELASTIC_PASSWORD))
+
 
 INDEX = config.ELASTIC_INDEX
 
@@ -42,8 +48,8 @@ def search(domain: str, term: str, page: int=1):
     if domain is None:
         query = {'multi_match': {'query': term, "fields": config.SEARCH_FIELDS}}
     else:
-        # Using "must" instead of "should". With the latter document with scores of
-        # zero were making it into the response.
+        # Using "must" instead of "should". With the latter, documents with scores
+        # of zero were making it into the response.
         query = {
             "bool": {
                 "must": {

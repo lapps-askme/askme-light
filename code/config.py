@@ -1,7 +1,11 @@
-
+# Basic ElasticSearch information, edit as needed.
 ELASTIC_HOST = 'localhost'
 ELASTIC_PORT = 9200
 ELASTIC_INDEX = 'xdd'
+
+# Edit as needed. The askme user should at least have the viewer role.
+ELASTIC_USER = 'askme'
+ELASTIC_PASSWORD = 'pw-askme'
 
 # Number of tokens we allow in the summary, set to a number that keeps processing
 # of a query below 0.5 seconds.
@@ -31,7 +35,6 @@ FIELDS_FOR_MULTIPLE_DOCS = (
 
 # List of all fields to includes when you request a single document. The scores
 # become irrelevant, but terms and entities are added.
-# is returned.
 FIELDS_FOR_SINGLE_DOC = (
 	'identifier', 'domain', 'year', 'title', 'url',
 	'authors', 'summary', 'terms', 'entities')
