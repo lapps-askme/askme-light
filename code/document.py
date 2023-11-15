@@ -50,7 +50,7 @@ class Document():
 	def as_json(self, single_doc=True):
 		"""Fields that are included are different depending whether we are returning
 		the JSON of a single document or wether this document is part of a list."""
-		fields = FIELDS_FOR_SINGLE_DOC if single_doc else FIELDS_FOR_MULITPLE_DOCS
+		fields = FIELDS_FOR_SINGLE_DOC if single_doc else FIELDS_FOR_MULTIPLE_DOCS
 		return { field: getattr(self, field) for field in fields }
 
 	def display_fields(self):
