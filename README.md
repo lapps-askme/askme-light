@@ -58,7 +58,7 @@ RUN mkdir /data \
 CMD bin/elasticsearch
 ```
 
-You can create the image needed and run it as follows:
+You can create the image needed as follows:
 
 ```bash
 $ docker build -t elastic:v1 -f code/docker/Dockerfile-elastic .
@@ -75,7 +75,7 @@ Notice the --user option, it is a common error (for me) to forget this, which wi
 Database population, assuming we are calling the database index "xdd":
 
 ```bash
-$ curl http://localhost:9200/xdd/_doc/_bulk -o /dev/null \
+$ curl -u elastic:jV4w6BMpnwYu5iNQX25j http://localhost:9200/xdd/_doc/_bulk -o /dev/null \
     -H "Content-Type: application/json" -X POST --data-binary @elastic.json
 ```
 
