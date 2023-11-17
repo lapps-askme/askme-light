@@ -63,7 +63,9 @@ $ docker exec -it <container-name> bash
 elasticsearch@365510585b92:~$ bin/elasticsearch-setup-passwords auto
 ```
 
-Randomly generated passwords, including for the elastic user, will be printed to the terminal. Under the hood this uses a bootstrapped password for the elastic user, you should only use this once at initial setup and when you run the command again it will fail, see [https://www.elastic.co/guide/en/elasticsearch/reference/7.17/setup-passwords.html](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/setup-passwords.html). Also note that you need to run this after ElasticSearch was started for the first time, since it needs access to a keystore which is not generated until ElasticSearch is first started. 
+Randomly generated passwords, including for the elastic user, will be printed to the terminal. Make note of them and save them, otherwise you cannot work as the elastic user if needed.
+
+Under the hood this uses a bootstrapped password for the elastic user, you should only use this once at initial setup and when you run the command again it will fail, see [setup-passwords.html](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/setup-passwords.html) in the reference of version 7.17. Also note that you need to run this after ElasticSearch was started for the first time, since it needs access to a keystore which is not generated until ElasticSearch is first started.
 
 Now you can connect:
 
@@ -92,7 +94,9 @@ See [https://www.elastic.co/guide/en/elasticsearch/reference/7.17/users-command.
 
 In Dockerfile-elastic-secure there is a line that creates an askme user. But note that built-in users have no passwords set up, that needs to be done by hand in case you want to delete indices or do something else that requires more than viewer priviliges.
 
-See [https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-roles.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-roles.html) for a list of built-in roles. Also see:
+See [https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-roles.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-roles.html) for a list of built-in roles.
+
+Also see:
 
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html)

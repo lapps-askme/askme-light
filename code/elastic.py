@@ -7,9 +7,10 @@ from document import Document
 
 
 # Suppressing the security warning, this is here in case you run this with an
-# ElasticSearch image that does not have security enabled.
+# ElasticSearch image that does not have security enabled. Will be made obsolte
+# rather soon.
 # warnings.filterwarnings("ignore", category=ElasticsearchWarning)
-warnings.filterwarnings("ignore", message=open('securitywarning.txt').read().strip())
+# warnings.filterwarnings("ignore", message=open('securitywarning.txt').read().strip())
 
 
 # ES = Elasticsearch([{
