@@ -24,8 +24,6 @@ Getting the second page for a search:
 $ curl -X POST "http:/127.0.0.1:8000/api/question?query=flu&page=2"
 $ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu&page=2"
 
-TODO: figure out behavior of last two queries, first gets nothing, second gets a list
-
 """
 
 

@@ -7,7 +7,7 @@ from document import Document
 
 
 # Suppressing the security warning, this is here in case you run this with an
-# ElasticSearch image that does not have security enabled. Will be made obsolte
+# ElasticSearch image that does not have security enabled. Will be made obsolete
 # rather soon.
 # warnings.filterwarnings("ignore", category=ElasticsearchWarning)
 # warnings.filterwarnings("ignore", message=open('securitywarning.txt').read().strip())
@@ -46,7 +46,7 @@ def get_documents(doc_ids: list):
 
 def search(domain: str, term: str, page: int=1):
     # TODO: 'term' could be multiple tokens and the search is now a disjunction
-    if domain is None:
+    if not domain:
         query = {'multi_match': {'query': term, "fields": config.SEARCH_FIELDS}}
     else:
         # Using "must" instead of "should". With the latter, documents with scores
@@ -56,6 +56,7 @@ def search(domain: str, term: str, page: int=1):
                 "must": {
                     "multi_match": {"query": term, "fields": config.SEARCH_FIELDS}},
                 "filter": {"term": {"topic": domain} }}}
+    print(query)
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)

@@ -7,6 +7,9 @@ ELASTIC_INDEX = 'xdd'
 ELASTIC_USER = 'askme'
 ELASTIC_PASSWORD = 'pw-askme'
 
+# List of domains to display in the interface
+DOMAINS = ('biomedical', 'geoarchive', 'molecular_physics')
+
 # Number of tokens we allow in the summary, set to a number that keeps processing
 # of a query below 0.5 seconds.
 SUMMARY_SIZE = 500

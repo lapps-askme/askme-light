@@ -62,7 +62,7 @@ class Document():
 			('year', self.year),
 			('url', f'<a href="{self.url}">{self.url}</a>'),
 			('authors', self.authors),
-			('domain', self.topic),
+			('domain', self.domain),
 			('summary', self.summary) ]
 
 

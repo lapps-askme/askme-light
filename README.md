@@ -1,6 +1,6 @@
 # AskMe Light
 
-A light-weight API and Flask application for AskMe. This is not yet fully replacing the Java code in the askme-elastic, askme-query, askme-ranking, askme-web and  askme-web-next repositories in [https://github.com/lappsgrid-incubator](https://github.com/lappsgrid-incubator). In particular, the ranking part is barely implemented yet (but we do run the basic NLP needed for ranking just to make fairer comparisons in performance speed) and the Flask site will never replace the Node.js code in askme-web-next. However, the idea is that askme-web-next will in the future use the API in this repository.
+A light-weight API and Flask application for AskMe. This is replacing the Java code in the askme-elastic, askme-query, askme-ranking and askme-web repositories in [https://github.com/lappsgrid-incubator](https://github.com/lappsgrid-incubator). Some parts of the Java code, in particular the re-ranking, are not or not fully implemented yet.
 
 
 ### Requirements
@@ -75,8 +75,9 @@ Notice the --user option, it is a common error (for me) to forget this, which wi
 Database population, assuming we are calling the database index "xdd":
 
 ```bash
-$ curl -u elastic:jV4w6BMpnwYu5iNQX25j http://localhost:9200/xdd/_doc/_bulk -o /dev/null \
-    -H "Content-Type: application/json" -X POST --data-binary @elastic.json
+$ curl -u elastic:<password> http://localhost:9200/xdd/_doc/_bulk \
+    -o /dev/null -H "Content-Type: application/json" \
+    -X POST --data-binary @elastic.json
 ```
 
 We would do this for each data drop, which historically have been focused on domains. The `elastic.json` was created by `prepare_elastic.py` in [https://github.com/lapps-xdd/xdd-processing](https://github.com/lapps-xdd/xdd-processing).
