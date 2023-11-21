@@ -20,7 +20,6 @@ def index():
     docs = []
     if term:
         result = elastic.search(domain, term)
-        print(result)
         docs = result.hits
         docs = ranking.rerank(docs)
     print(f'Elapsed time: {time.time()-t0:.2f} seconds')

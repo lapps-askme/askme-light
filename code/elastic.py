@@ -56,7 +56,6 @@ def search(domain: str, term: str, page: int=1):
                 "must": {
                     "multi_match": {"query": term, "fields": config.SEARCH_FIELDS}},
                 "filter": {"term": {"topic": domain} }}}
-    print(query)
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)

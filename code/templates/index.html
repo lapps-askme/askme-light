@@ -22,12 +22,12 @@
       <p>
       {% for dom in domains %}
       {% set checked = ' checked' if dom == domain else '' %}
-      <input type="radio" name="domain" value={{dom}} {{checked}}>
+      <input type="radio" name="domain" value="{{dom}}" {{checked}}>
       <label for={{dom}}>{{dom}}</label>&nbsp;&nbsp;
       {% endfor %}
       </p>
 
-      <p>Search term: <input type="text" name="term" value={{term}}></p>
+      <p>Search term: <input type="text" name="term" value="{{term}}"></p>
 
       <p><input type="submit" style="display:none;"></p>
 
