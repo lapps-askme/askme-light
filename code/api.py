@@ -76,6 +76,24 @@ def query(domain: str = None, query: str = None, page: int=1):
             f"Index {domain} does not exist",
             DEBUG)
 
+@app.get('/api/related/{doc_id}')
+def get_related(doc_id: str, pretty: bool = False):
+    # first get document title and terms, then the related documents
+    result = elastic.get_document(doc_id)
+    doc = result.hits[0]
+    query = f'{doc.title} {doc.terms_as_string()}'
+    result = elastic.search(None, query)
+    docs = document.DocumentSet(result.hits)
+    answer = {
+        "status": "succes",
+        "query": { "doc_id": doc_id, "terms": query },
+        "documents": [d.as_json(single_doc=False) for d in docs.documents] }
+    if pretty:
+        json_str = json.dumps(answer, indent=2)
+        answer = Response(content=json_str, media_type='application/json')
+    return answer
+
+
 @app.get('/api/set')
 def get_set(ids: str):
     doc_ids = [identifier for identifier in ids.split(',')]
