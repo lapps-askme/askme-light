@@ -6,8 +6,6 @@
 
     <form action="/" method="get">
 
-      <input type="text" name="index" value="{{index}}" hidden>
-
       {% if debug and request.args: %}
       <table cellpadding="5" cellspacing="0" border="1">
         {% for key, val in request.args.items() %}
@@ -40,7 +38,6 @@
     <p>Printing {{result.hits_returned}} of {{result.total_hits}} hits </p>
     
     <form action="set" method="get">
-      <input type="hidden" name="index" value={{index}}>
       <table cellpadding="10" cellspacing="0" border="1">
       {% for doc in docs %}
       {% set id = doc.identifier %}
@@ -58,7 +55,9 @@
 
     {% else %}
     
+    {% if term %}
     <p>No results found</p>
+    {% endif %}
 
     {% endif %}
 

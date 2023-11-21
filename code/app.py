@@ -38,7 +38,7 @@ def get_document():
 
 @app.route("/set")
 def get_set():
-    doc_ids = [identifier for identifier in request.args if not identifier == 'index']
+    doc_ids = [identifier for identifier in request.args]
     result = elastic.get_documents(doc_ids)
     doc_set = document.DocumentSet(result.hits)
     return render_template('set.html', docs=doc_set.documents, terms=doc_set.get_terms())
