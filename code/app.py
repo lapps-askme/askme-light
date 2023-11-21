@@ -45,14 +45,12 @@ def get_set():
     
 @app.route("/related", methods=['POST'])
 def get_related():
-    index = request.form.get("index")
     title = request.form.get("title")
-    abstract = request.form.get("abstract")
-    text = request.form.get("text")
-    result = elastic.search(index, title)
+    terms = request.form.get("terms")
+    result = elastic.search(None, f'{title} {terms}')
     return render_template(
         'related.html', index=index,
-        title=title, abstract=abstract, text=text, result=result)
+        title=title, terms=terms, result=result)
 
 
 if __name__ == '__main__':

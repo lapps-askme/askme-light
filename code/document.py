@@ -47,6 +47,9 @@ class Document():
 	def sorted_terms(self):
 		return sorted(self.terms, key=itemgetter(2), reverse=True)
 
+	def terms_as_string(self):
+		return ' '.join([term[0] for term in self.terms])
+
 	def as_json(self, single_doc=True):
 		"""Fields that are included are different depending whether we are returning
 		the JSON of a single document or wether this document is part of a list."""
@@ -54,8 +57,8 @@ class Document():
 		return { field: getattr(self, field) for field in fields }
 
 	def display_fields(self):
-		"""Return a list of fields to be displayed in the Flask application. Each field
-		is a tuple of a field name and field value."""
+		"""Return a list of basic fields to be displayed in the Flask application.
+		Each field is a pair of a field name and field value."""
 		return [
 			('document', self.identifier),
 			('title', self.title),

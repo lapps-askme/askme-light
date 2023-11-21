@@ -9,19 +9,14 @@
     <p>Finding related documents, using:</p>
 
     <table cellpadding="10" cellspacing="0" border="1">
-      <tr valign="top"><td>index</td><td>{{index}}</td></tr>
       <tr valign="top"><td>title</td><td>{{title}}</td></tr>
-      <!--
-      <tr valign="top"><td>abstract</td><td>{{abstract}}</td></tr>
-      <tr valign="top"><td>text</td><td>{{text}}</td></tr>
-      <tr valign="top"><td>entities</td><td></td></tr>
-      -->
+      <tr valign="top"><td>terms</td><td>{{terms}}</td></tr>
     </table>
 
     <p/>
 
     <table cellpadding="10" cellspacing="0" border="1">
-    {% for doc in result.hits[:10] %}
+    {% for doc in result.hits[:20] %}
     {% set id = doc.identifier %}
       <tr>
         <td align="right">{{"%.4f" % doc.score}}</td>
