@@ -85,7 +85,7 @@ def get_related(doc_id: str, pretty: bool = False):
     result = elastic.search(None, query)
     docs = document.DocumentSet(result.hits)
     answer = {
-        "status": "succes",
+        "status": "success",
         "query": { "doc_id": doc_id, "terms": query },
         "documents": [d.as_json(single_doc=False) for d in docs.documents] }
     if pretty:
