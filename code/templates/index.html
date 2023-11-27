@@ -4,16 +4,18 @@
 
     <h3>AskMe</h3>
 
-    {% if debug and request.args: %}
-    <table cellpadding="5" cellspacing="0" border="1">
-      {% for var in request.args %}
-      <tr>
-        <td>get:{{var}}</td>
-        <td>{{request.args.getlist(var)}}</td>
-      </tr>
-      {% endfor %}
-    </table>
-    {% endif %}
+    <form action="/" method="get">
+
+      {% if debug and request.args: %}
+      <table cellpadding="5" cellspacing="0" border="1">
+        {% for key, val in request.args.items() %}
+        <tr>
+          <td>get:{{var}}</td>
+          <td>{{request.args.getlist(var)}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
 
     <!-- domain selection and search term box -->
     <form action="/" method="get">
@@ -52,7 +54,6 @@
     <p>Printing {{result.hits_returned}} of {{result.total_hits}} hits </p>
     
     <form action="set" method="get">
-      <input type="hidden" name="index" value={{index}}>
       <table cellpadding="10" cellspacing="0" border="1">
       {% for doc in docs %}
       {% set id = doc.identifier %}
@@ -70,7 +71,9 @@
 
     {% else %}
     
+    {% if term %}
     <p>No results found</p>
+    {% endif %}
 
     {% endif %}
 
