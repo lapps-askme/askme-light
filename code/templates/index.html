@@ -4,34 +4,46 @@
 
     <h3>AskMe</h3>
 
+    {% if debug and request.args: %}
+    <table cellpadding="5" cellspacing="0" border="1">
+      {% for var in request.args %}
+      <tr>
+        <td>get:{{var}}</td>
+        <td>{{request.args.getlist(var)}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    <!-- domain selection and search term box -->
     <form action="/" method="get">
-
-      <input type="text" name="index" value="{{index}}" hidden>
-
-      {% if debug and request.args: %}
-      <table cellpadding="5" cellspacing="0" border="1">
-        {% for key, val in request.args.items() %}
-        <tr>
-          <td>get:{{key}}</td>
-          <td>{{val}}</td>
-        </tr>
-        {% endfor %}
-      </table>
-      {% endif %}
-
       <p>
+      <input type="radio" name="domain" id="None" value="" checked>
+      <label for="None">No selection</label>&nbsp;&nbsp;
       {% for dom in domains %}
       {% set checked = ' checked' if dom == domain else '' %}
-      <input type="radio" name="domain" value="{{dom}}" {{checked}}>
+      <input type="radio" name="domain" id="{{dom}}" value="{{dom}}" {{checked}}>
       <label for={{dom}}>{{dom}}</label>&nbsp;&nbsp;
       {% endfor %}
       </p>
-
       <p>Search term: <input type="text" name="term" value="{{term}}"></p>
-
       <p><input type="submit" style="display:none;"></p>
-
     </form>
+
+    <!-- same as above but with multiple select, not yet used because -->
+    <!-- the API does not have the right functionality for that yet   -->
+    <!--
+    <form action="/" method="get">
+      <fieldset id="group1" multiple>
+        {% for dom in domains %}
+        <input type="checkbox" name="domain" id="x{{dom}}" value="{{dom}}" checked>
+        <label for="x{{dom}}">{{dom}}</label>
+        {% endfor %}
+      </fieldset>
+      <p>Search term: <input type="text" name="term" value="{{term}}"></p>
+      <p><input type="submit" style="display:none;"></p>
+    </form>
+    -->
 	
     {% if result %}
 

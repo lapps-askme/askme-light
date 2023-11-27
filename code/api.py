@@ -11,6 +11,11 @@ Get a list of documents:
 
 $ curl http://localhost:8000/api/set?ids=5783bcafcf58f176c768f5cc,58102ca2cf58f15425a75367
 
+Get related documents:
+
+$ curl http:/127.0.0.1:8000/api/related/54b4324ee138239d8684aeb2
+$ curl http:/127.0.0.1:8000/api/related/54b4324ee138239d8684aeb2?pretty=true
+
 Searching for a term:
 
 $ curl -X POST "http:/127.0.0.1:8000/api/question?query=flu"

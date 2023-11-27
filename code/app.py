@@ -22,11 +22,14 @@ def index():
         result = elastic.search(domain, term)
         docs = result.hits
         docs = ranking.rerank(docs)
-    print(f'Elapsed time: {time.time()-t0:.2f} seconds')
+    #print(f'Elapsed time: {time.time()-t0:.2f} seconds')
+    #print(list(request.args.values()))
+    #print(request.args)
+    #for x in request.args:
+    #    print(request.args.getlist(x))
     return render_template(
-        'index.html', index=config.ELASTIC_INDEX, domains=config.DOMAINS,
-        domain=domain, term=term, result=result, docs=docs,
-        request=request, debug=debug)
+        'index.html', domains=config.DOMAINS, domain=domain, term=term,
+        result=result, docs=docs, request=request, debug=debug)
 
 @app.route("/document")
 def get_document():
