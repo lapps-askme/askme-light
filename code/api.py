@@ -57,15 +57,18 @@ def home():
         "indices": elastic.indices() }
 
 @app.post('/api/question')
-def query(domain: str = None, query: str = None, page: int=1):
+def query(domains: str = None, query: str = None, page: int=1):
     """Search endpoint for the current web interface."""
     # if page number is larger than MAX_PAGES or less than 1, default to 1
     if page > config.MAX_PAGES or page < 1:
         page = 1
+    # create a list from domains string
+    if domains:
+        domains = domains.split(',')
     if DEBUG:
-        print({"domain": domain, "question": query[:50], "page": page})
+        print({"domains": domains, "question": query[:50], "page": page})
     try:
-        result = elastic.search(domain, query, page)
+        result = elastic.search(domains, query, page)
         result.hits = ranking.rerank(result.hits)
         if DEBUG:
             print('>>>', result)
@@ -78,7 +81,6 @@ def query(domain: str = None, query: str = None, page: int=1):
     except elasticsearch.NotFoundError as e:
         return error(
             "elasticsearch.NotFoundError",
-            f"Index {domain} does not exist",
             DEBUG)
 
 @app.get('/api/related/{doc_id}')

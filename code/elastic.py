@@ -44,9 +44,9 @@ def get_documents(doc_ids: list):
         source_excludes=['abstract', 'text'])
     return SearchResult(result)
 
-def search(domain: str, term: str, page: int=1):
+def search(domains: list, term: str, page: int=1):
     # TODO: 'term' could be multiple tokens and the search is now a disjunction
-    if not domain:
+    if not domains:
         query = {'multi_match': {'query': term, "fields": config.SEARCH_FIELDS}}
     else:
         # Using "must" instead of "should". With the latter, documents with scores
@@ -55,7 +55,7 @@ def search(domain: str, term: str, page: int=1):
             "bool": {
                 "must": {
                     "multi_match": {"query": term, "fields": config.SEARCH_FIELDS}},
-                "filter": {"term": {"topic": domain} }}}
+                "filter": {"terms": {"topic": domains} }}}
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)
