@@ -57,7 +57,7 @@ def home():
         "indices": elastic.indices() }
 
 @app.post('/api/question')
-def query(domains: str = None, query: str = None, page: int=1):
+def query(domains: str = None, query: str = None, type = None, page: int=1):
     """Search endpoint for the current web interface."""
     # if page number is larger than MAX_PAGES or less than 1, default to 1
     if page > config.MAX_PAGES or page < 1:
@@ -68,7 +68,7 @@ def query(domains: str = None, query: str = None, page: int=1):
     if DEBUG:
         print({"domains": domains, "question": query[:50], "page": page})
     try:
-        result = elastic.search(domains, query, page)
+        result = elastic.search(domains, query, type, page)
         result.hits = ranking.rerank(result.hits)
         if DEBUG:
             print('>>>', result)
