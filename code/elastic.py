@@ -51,7 +51,7 @@ def search(domains: list, term: str, type: str, page: int=1):
     query = {
         "bool": {
             "must": {
-                "multi_match": {"query": term, "fields": config.SEARCH_FIELDS, "type": "phrase" if type == "exact" else None}},
+                "multi_match": {"query": term, "fields": config.SEARCH_FIELDS, "type": "phrase" if type == "exact" else "best_fields"}},
             "filter": {"terms": {"topic": domains} } if domains else None}}
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
