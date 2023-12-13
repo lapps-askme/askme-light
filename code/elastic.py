@@ -44,7 +44,7 @@ def get_documents(doc_ids: list):
         source_excludes=['abstract', 'text'])
     return SearchResult(result)
 
-def search(domains: list, term: str, type: str, page: int=1):
+def search(domains: list, term: str, type: str=None, page: int=1):
     # TODO: 'term' could be multiple tokens and the search is now a disjunction
     # Using "must" instead of "should". With the latter, documents with scores
     # of zero were making it into the response.
