@@ -44,18 +44,15 @@ def get_documents(doc_ids: list):
         source_excludes=['abstract', 'text'])
     return SearchResult(result)
 
-def search(domain: str, term: str, page: int=1):
+def search(domains: list, term: str, type: str=None, page: int=1):
     # TODO: 'term' could be multiple tokens and the search is now a disjunction
-    if not domain:
-        query = {'multi_match': {'query': term, "fields": config.SEARCH_FIELDS}}
-    else:
-        # Using "must" instead of "should". With the latter, documents with scores
-        # of zero were making it into the response.
-        query = {
-            "bool": {
-                "must": {
-                    "multi_match": {"query": term, "fields": config.SEARCH_FIELDS}},
-                "filter": {"term": {"topic": domain} }}}
+    # Using "must" instead of "should". With the latter, documents with scores
+    # of zero were making it into the response.
+    query = {
+        "bool": {
+            "must": {
+                "multi_match": {"query": term, "fields": config.SEARCH_FIELDS, "type": "phrase" if type == "exact" else "best_fields"}},
+            "filter": {"terms": {"topic": domains} } if domains else None}}
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)
