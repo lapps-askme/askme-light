@@ -118,6 +118,7 @@ def get_document(doc_id: str, pretty: bool = False):
     result = elastic.get_document(doc_id)
     if result.total_hits:
         response = result.hits[0]
+        response.terms = response.sorted_terms()
         if pretty:
             json_str = json.dumps(response.as_json(single_doc=True), indent=2)
             response = Response(content=json_str, media_type='application/json')
