@@ -33,7 +33,7 @@ $ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu&pa
 
 
 import json
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, HTTPException
 
 import config
 import elasticsearch
@@ -73,15 +73,12 @@ def query(domains: str = None, query: str = None, type = None, page: int=1):
         if DEBUG:
             print('>>>', result)
         return {
-            "status": "succes",
             "query": { "question": query },
             "documents": [doc.as_json(single_doc=False) for doc in result.hits],
             "duration": result.took,
             "pages": get_valid_pages(result.total_hits, page) }
     except elasticsearch.NotFoundError as e:
-        return error(
-            "elasticsearch.NotFoundError",
-            DEBUG)
+        raise HTTPException(status_code=400, detail=f"Index '{INDEX}' does not exist")
 
 @app.get('/api/related/{doc_id}')
 def get_related(doc_id: str, pretty: bool = False):
@@ -92,7 +89,6 @@ def get_related(doc_id: str, pretty: bool = False):
     result = elastic.search(None, query)
     docs = document.DocumentSet(result.hits)
     answer = {
-        "status": "success",
         "query": { "doc_id": doc_id, "terms": query },
         "documents": [d.as_json(single_doc=False) for d in docs.documents] }
     if pretty:
@@ -107,7 +103,6 @@ def get_set(ids: str):
     result = elastic.get_documents(doc_ids)
     doc_set = document.DocumentSet(result.hits)
     return {
-        "status": "succes",
         "query": { "index": INDEX, "ids": ids },
         "documents": doc_set.documents,
         "terms": doc_set.get_terms() }
@@ -115,16 +110,19 @@ def get_set(ids: str):
 @app.get('/api/doc/{doc_id}')
 def get_document(doc_id: str, pretty: bool = False):
     """Return the document source or an empty dictionary if no such document exists."""
-    result = elastic.get_document(doc_id)
-    if result.total_hits:
-        response = result.hits[0]
-        response.terms = response.sorted_terms()
-        if pretty:
-            json_str = json.dumps(response.as_json(single_doc=True), indent=2)
-            response = Response(content=json_str, media_type='application/json')
-        return response
-    else:
-        return {} 
+    try:
+        result = elastic.get_document(doc_id)
+        if result.total_hits:
+            response = result.hits[0]
+            response.terms = response.sorted_terms()
+            if pretty:
+                json_str = json.dumps(response.as_json(single_doc=True), indent=2)
+                response = Response(content=json_str, media_type='application/json')
+            return response
+        else:
+            return {} 
+    except elasticsearch.NotFoundError as e:
+        raise HTTPException(status_code=400, detail=f"Index '{INDEX}' does not exist")
 
 @app.get('/api/doc/{doc_id}/{field}')
 def get_field(doc_id: str, field: str):
