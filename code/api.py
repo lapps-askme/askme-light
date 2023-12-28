@@ -33,7 +33,8 @@ $ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu&pa
 
 
 import json
-from fastapi import FastAPI, Response, HTTPException
+from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi.responses import JSONResponse
 
 import config
 import elasticsearch
@@ -48,6 +49,10 @@ DEBUG = False
 INDEX = config.ELASTIC_INDEX
 
 app = FastAPI()
+
+@app.exception_handler(Exception)
+async def internal_exception_handler(request: Request, exc: Exception):
+  return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 @app.get('/api')
