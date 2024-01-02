@@ -75,6 +75,8 @@ class DocumentSet:
 	"""A list of documents."""
 
 	# TODO: should probably emulate a list
+	# TODO: rename into Documents or DocumentList
+	# TODO: use this in SearchResult
 
 	def __init__(self, documents):
 		self.documents = documents

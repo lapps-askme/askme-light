@@ -1,16 +1,15 @@
+import json
+from fastapi import Response
+
 import config
 
 
-def error(error_class: str, error_message: str, debug=False) -> dict:
-	"""Returns a dictionary with error information, optionally printing it to the
-	standard output."""
-	message = {
-		"status": "error",
-		"error-class": error_class,
-		"error-message": error_message }
-	if debug:
-		print(message)
-	return message
+def prettify(result_dict: dict) -> Response:
+    """Prettify a dictionary by wrapping it as a pretty-printed json string
+    inside a Response object."""
+    json_str = json.dumps(result_dict, indent=2)
+    return Response(content=json_str, media_type='application/json')
+
 
 def get_valid_pages(total_hits: int, current_page: int) -> dict:
     """Returns a mix of self, first, last, next, and previous
@@ -37,3 +36,16 @@ def get_valid_pages(total_hits: int, current_page: int) -> dict:
     if current_page != total_pages:
         pages.update({"last": total_pages})
     return pages
+
+
+class color:
+    PURPLE = '\033[95m'
+    CYAN = '\033[96m'
+    DARKCYAN = '\033[36m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'

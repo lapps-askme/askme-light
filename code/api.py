@@ -31,17 +31,19 @@ $ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu&pa
 
 """
 
-
+import elasticsearch
 import json
-from fastapi import FastAPI, Response, HTTPException
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, PlainTextResponse
 
 import config
-import elasticsearch
+import document
 import elastic
 import ranking
-import document
-from utils import error, get_valid_pages
-
+from utils import get_valid_pages, prettify
+from exceptions import AskmeException, handle_askme_exception
+from exceptions import handle_python_exception, handle_elastic_exception
 
 DEBUG = False
 
@@ -50,14 +52,35 @@ INDEX = config.ELASTIC_INDEX
 app = FastAPI()
 
 
+@app.exception_handler(Exception)
+async def python_exception_handler(request: Request, exc: Exception):
+    return handle_python_exception(request, exc)
+
+@app.exception_handler(AskmeException)
+async def askme_exception_handler(request: Request, exc: Exception):
+    return handle_askme_exception(request, exc)
+
+@app.exception_handler(elasticsearch.ApiError)
+async def elastic_exception_handler(request: Request, exc: Exception):
+    return handle_elastic_exception(request, exc)
+
+
 @app.get('/api')
 def home():
     return {
         "description": "AskMe API",
-        "indices": elastic.indices() }
+        "help": "Ping the /api/help endpoint for help" }
+
+@app.get('/api/help', response_class=PlainTextResponse)
+def home():
+    return __doc__
+
+@app.get('/api/error')
+def error():
+    raise AskmeException(message="The endpoint /api/error always raises an exception")
 
 @app.post('/api/question')
-def query(domains: str = None, query: str = None, type = None, page: int=1):
+def query(domains: str=None, query: str=None, type=None, page: int=1):
     """Search endpoint for the current web interface."""
     # if page number is larger than MAX_PAGES or less than 1, default to 1
     if page > config.MAX_PAGES or page < 1:
@@ -67,41 +90,41 @@ def query(domains: str = None, query: str = None, type = None, page: int=1):
         domains = domains.split(',')
     if DEBUG:
         print({"domains": domains, "question": query[:50], "page": page})
-    try:
-        result = elastic.search(domains, query, type, page)
-        result.hits = ranking.rerank(result.hits)
-        if DEBUG:
-            print('>>>', result)
-        return {
-            "query": { "question": query },
-            "documents": [doc.as_json(single_doc=False) for doc in result.hits],
-            "duration": result.took,
-            "pages": get_valid_pages(result.total_hits, page) }
-    except elasticsearch.NotFoundError as e:
-        raise HTTPException(status_code=400, detail=f"Index '{INDEX}' does not exist")
+    result = elastic.search(domains, query, type, page)
+    result.hits = ranking.rerank(result.hits)
+    if DEBUG:
+        print('>>>', result)
+    return {
+        "query": { "question": query },
+        "documents": [doc.as_json(single_doc=False) for doc in result.hits],
+        "duration": result.took,
+        "pages": get_valid_pages(result.total_hits, page) }
 
 @app.get('/api/related/{doc_id}')
 def get_related(doc_id: str, pretty: bool = False):
-    # first get document title and terms, then the related documents
     result = elastic.get_document(doc_id)
-    doc = result.hits[0]
+    doc = result.first_doc()
     query = f'{doc.title} {doc.terms_as_string()}'
     result = elastic.search(None, query)
-    docs = document.DocumentSet(result.hits)
+    docs = document.DocumentSet(result.docs)
     answer = {
         "query": { "doc_id": doc_id, "terms": query },
         "documents": [d.as_json(single_doc=False) for d in docs.documents] }
     if pretty:
-        json_str = json.dumps(answer, indent=2)
-        answer = Response(content=json_str, media_type='application/json')
+        answer = prettify(answer)
     return answer
-
 
 @app.get('/api/set')
 def get_set(ids: str):
     doc_ids = [identifier for identifier in ids.split(',')]
     result = elastic.get_documents(doc_ids)
-    doc_set = document.DocumentSet(result.hits)
+    if result.error:
+        if DEBUG:
+            result.error_details.pp()
+        raise AskmeException(
+            result.error_details.reason(),
+            details=result.error_details.details)
+    doc_set = document.DocumentSet(result.docs)
     return {
         "query": { "index": INDEX, "ids": ids },
         "documents": doc_set.documents,
@@ -110,19 +133,16 @@ def get_set(ids: str):
 @app.get('/api/doc/{doc_id}')
 def get_document(doc_id: str, pretty: bool = False):
     """Return the document source or an empty dictionary if no such document exists."""
-    try:
-        result = elastic.get_document(doc_id)
-        if result.total_hits:
-            response = result.hits[0]
-            response.terms = response.sorted_terms()
-            if pretty:
-                json_str = json.dumps(response.as_json(single_doc=True), indent=2)
-                response = Response(content=json_str, media_type='application/json')
-            return response
-        else:
-            return {} 
-    except elasticsearch.NotFoundError as e:
-        raise HTTPException(status_code=400, detail=f"Index '{INDEX}' does not exist")
+    1/0
+    result = elastic.get_document(doc_id)
+    if result.total_hits:
+        response = result.docs[0]
+        response.terms = response.sorted_terms()
+        if pretty:
+            response = prettify(response.as_json(single_doc=True))
+        return response
+    else:
+        return {}
 
 @app.get('/api/doc/{doc_id}/{field}')
 def get_field(doc_id: str, field: str):

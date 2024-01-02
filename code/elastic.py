@@ -1,6 +1,7 @@
-import sys, warnings, argparse
+import sys, warnings, argparse, pprint
 
 from elasticsearch import Elasticsearch, ElasticsearchWarning
+from elastic_transport import ObjectApiResponse
 
 import config
 from document import Document
@@ -61,38 +62,67 @@ def search(domains: list, term: str, type: str=None, page: int=1):
 
 class SearchResult:
 
-    """Convenience wrapper around the response from ElasticSearch. The response is
-    different depending on whether we called ES.mget() or ES.search()."""
+    """Convenience wrapper around the response from ElasticSearch."""
 
-    def __init__(self, elastic_response):
-        # elastic_response is of type elastic_transport.ObjectApiResponse
+    def __init__(self, elastic_response: ObjectApiResponse):
+        """The response is different depending on whether we called ES.mget() or
+        ES.search(). While in both cases the response is an ObjectApiResponse, in
+        the former case it just has a 'docs' property while in the latter there are
+        'took', 'timed_out', '_shards' and 'hits' properties."""
         self.response = elastic_response
-        self.took = self.response.get('took')
-        self.timed_out = self.response.get('timed_out')
-        self.shards = self.response.get('_shards')
-        self.hits = self._get_hits()
-        self.hits_returned = len(self.hits)
-        self.total_hits = self._get_total_hits()
+        self.error = False
+        if 'docs' in self.response:
+            docs = self.response['docs']
+            if docs and (len(docs) == 1) and 'error' in docs[0]:
+                self.error = True
+                self.error_details = ElasticErrorDetails(elastic_response)
+                self.docs = []
+                self.total_hits = 0
+            else:
+                self.docs = self.docs_from_hits(docs)
+                self.total_hits = len(self)
+        else:
+            self.docs = self.docs_from_hits(self.response['hits']['hits'])
+            self.total_hits = self.response['hits']['total']['value']
 
     def __str__(self):
-        return f'<SearchResult with {self.hits_returned}/{self.total_hits} hits>'
+        return f'<SearchResult hits={self.total_hits} succes={not self.error}>'
 
     def __len__(self):
-        return self.hits_returned
+        return len(self.docs)
 
-    def _get_hits(self):
-        if 'docs' in self.response:
-            hits = self.response['docs']
-        else:
-            hits = self.response['hits']['hits']
-        # NOTE: should perhaps return a DocumentSet
+    def __getitem__(self, i):
+        return self.docs[i]
+
+    def first_doc(self):
+        try:
+            return self.docs[0]
+        except IndexError:
+            return None
+
+    @staticmethod
+    def docs_from_hits(hits: list):
         return [Document(hit) for hit in hits]
 
-    def _get_total_hits(self):
-        if 'docs' in self.response:
-            return self.hits_returned
-        else:
-            return self.response['hits']['total']['value']
+
+class ElasticErrorDetails:
+
+    """Class to deal with the errors you get when using ES.mget(), where no
+    exception will be raised but the error is hidden in the first element of
+    the docs list that is returned in the JSON response."""
+
+    def __init__(self, elastic_response: ObjectApiResponse):
+        self.response = elastic_response
+        self.details = elastic_response.get('docs', [None])[0]
+
+    def reason(self):
+        return self.details.get('error', {}).get('reason')
+
+    def pp(self):
+        print(self)
+        simplified = dict(self.details)
+        del simplified['root_cause']
+        pprint.pprint(simplified, indent=2)
 
 
 def test(domain: str, term: str):
