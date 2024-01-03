@@ -31,11 +31,11 @@ $ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu&pa
 
 """
 
-import elasticsearch
 import json
 
+import elasticsearch
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import Response, JSONResponse, PlainTextResponse
 
 import config
 import document
@@ -51,6 +51,17 @@ INDEX = config.ELASTIC_INDEX
 
 app = FastAPI()
 
+'''
+@app.exception_handler(Exception)
+async def internal_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": 500,
+            "message": "Internal Server Error",
+            "stack":traceback.format_exception(*sys.exc_info()),
+            "details": {"details?": "none"}})
+'''
 
 @app.exception_handler(Exception)
 async def python_exception_handler(request: Request, exc: Exception):
@@ -91,13 +102,12 @@ def query(domains: str=None, query: str=None, type=None, page: int=1):
     if DEBUG:
         print({"domains": domains, "question": query[:50], "page": page})
     result = elastic.search(domains, query, type, page)
-    result.hits = ranking.rerank(result.hits)
+    result.hits = ranking.rerank(result.docs)
     if DEBUG:
         print('>>>', result)
     return {
         "query": { "question": query },
         "documents": [doc.as_json(single_doc=False) for doc in result.hits],
-        "duration": result.took,
         "pages": get_valid_pages(result.total_hits, page) }
 
 @app.get('/api/related/{doc_id}')
@@ -133,7 +143,6 @@ def get_set(ids: str):
 @app.get('/api/doc/{doc_id}')
 def get_document(doc_id: str, pretty: bool = False):
     """Return the document source or an empty dictionary if no such document exists."""
-    1/0
     result = elastic.get_document(doc_id)
     if result.total_hits:
         response = result.docs[0]
