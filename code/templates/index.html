@@ -6,29 +6,54 @@
 
     <form action="/" method="get">
 
+      {% if debug and request.args: %}
+      <table cellpadding="5" cellspacing="0" border="1">
+        {% for key, val in request.args.items() %}
+        <tr>
+          <td>get:{{var}}</td>
+          <td>{{request.args.getlist(var)}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+
+    <!-- domain selection and search term box -->
+    <form action="/" method="get">
       <p>
-      {% for index in indices %}
-      {% set checked = ' checked' if index == 'xdd-bio' else '' %}
-      <input type="radio" id={{index}} name="index" value={{index}} {{checked}}>
-      <label for={{index}}>{{index}}</label>&nbsp;&nbsp;
+      <input type="radio" name="domain" id="None" value="" checked>
+      <label for="None">No selection</label>&nbsp;&nbsp;
+      {% for dom in domains %}
+      {% set checked = ' checked' if dom == domain else '' %}
+      <input type="radio" name="domain" id="{{dom}}" value="{{dom}}" {{checked}}>
+      <label for={{dom}}>{{dom}}</label>&nbsp;&nbsp;
       {% endfor %}
       </p>
-
-      <p>Search term: <input type="text" name="term" value={{term}}></p>
-
+      <p>Search term: <input type="text" name="term" value="{{term}}"></p>
       <p><input type="submit" style="display:none;"></p>
-
     </form>
+
+    <!-- same as above but with multiple select, not yet used because -->
+    <!-- the API does not have the right functionality for that yet   -->
+    <!--
+    <form action="/" method="get">
+      <fieldset id="group1" multiple>
+        {% for dom in domains %}
+        <input type="checkbox" name="domain" id="x{{dom}}" value="{{dom}}" checked>
+        <label for="x{{dom}}">{{dom}}</label>
+        {% endfor %}
+      </fieldset>
+      <p>Search term: <input type="text" name="term" value="{{term}}"></p>
+      <p><input type="submit" style="display:none;"></p>
+    </form>
+    -->
 	
     {% if result %}
 
-    <h4>Results</h4>
+    <hr/>
 
     <p>Printing {{result.hits_returned}} of {{result.total_hits}} hits </p>
     
     <form action="set" method="get">
-      <p>{{index}}</p>
-      <input type="hidden" name="index" value={{index}}>
       <table cellpadding="10" cellspacing="0" border="1">
       {% for doc in docs %}
       {% set id = doc.identifier %}
@@ -46,7 +71,9 @@
 
     {% else %}
     
+    {% if term %}
     <p>No results found</p>
+    {% endif %}
 
     {% endif %}
 

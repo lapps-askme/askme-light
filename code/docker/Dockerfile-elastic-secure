@@ -1,0 +1,16 @@
+# Dockerfile to build a basic image with ElasticSearch on it. It uses minimal security,
+# but anyone with access to this repository will know how to view the AskMe data. This
+# may become a problem once we allow users to add data.
+
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+
+RUN mkdir /data \
+	&& chown elasticsearch /data \
+	&& echo "path.data: /data" >> /usr/share/elasticsearch/config/elasticsearch.yml \
+	&& echo "discovery.type: single-node" >> /usr/share/elasticsearch/config/elasticsearch.yml \
+	&& echo "xpack.security.enabled: true" >> /usr/share/elasticsearch/config/elasticsearch.yml
+
+# The values used here are the same as in code/config.py
+RUN /usr/share/elasticsearch/bin/elasticsearch-users useradd askme -p pw-askme -r viewer
+
+CMD bin/elasticsearch

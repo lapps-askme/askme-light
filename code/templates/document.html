@@ -6,6 +6,14 @@
 
     <h3>AskMe Document</h3>
 
+    <form action="/related" method="post">
+      <textarea id="title" name="title" style="display:none;">{{doc['title']}}</textarea>
+      <textarea id="terms" name="terms" style="display:none;">{{doc.terms_as_string()}}</textarea>
+      <input type="submit" value="Related documents"></p>
+    </form>
+
+    <p/>
+
     <table cellpadding="10" cellspacing="0" border="1">
 
     <!-- printing the atomic document fields -->
@@ -23,7 +31,7 @@
         <table cellspacing="4">
           {% for term in doc.sorted_terms()[:20] %}
           <tr>
-            <td>{{ term[0] }}</td>
+            <td><a href="/?term={{term[0]}}">{{term[0]}}</td>
             <td>&nbsp;</td>
             <td align="right">{{ term[1] }}</td>
             <td>&nbsp;</td>
@@ -34,7 +42,7 @@
       </td>
     </tr>
 
-
+    <!-- printing the entities -->
     <tr>
       <td valign="top">entities</td>
       <td>
@@ -53,16 +61,6 @@
     </tr>
 
     </table>
-
-  <p/>
-
-  <form action="/related" method="post">
-    <input id="index" name="index" style="display:none;" value={{index}}>
-    <textarea id="title" name="title" style="display:none;">{{doc['title']}}</textarea>
-    <textarea id="abstract" name="abstract" style="display:none;">{{doc['abstract']}}</textarea>
-    <textarea id="text" name="text" style="display:none;">{{doc['text']}}</textarea>
-    <input type="submit" value="Related documents"></p>
-  </form>
 
   </body>
 
