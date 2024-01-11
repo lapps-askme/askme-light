@@ -19,7 +19,7 @@ class AskmeException(Exception):
 
     def __init__(self,
                  message: str,
-                 status: int = 400,
+                 status: int = 500,
                  details: dict = None):
         self.status = status
         self.message = message
@@ -57,9 +57,9 @@ def handle_elastic_exception(request: Request, exc: ApiError):
 def handle_python_exception(request: Request, exc: Exception):
     stack = traceback.format_exception(*sys.exc_info())
     return JSONResponse(
-        status_code=400,
+        status_code=500,
         content={
-            "status": 400,
+            "status": 500,
             "message": f"Python exception: {str(exc)}.",
             "stack": stack,
             "details": {

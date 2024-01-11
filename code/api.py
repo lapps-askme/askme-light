@@ -35,7 +35,7 @@ import json
 
 import elasticsearch
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import Response, JSONResponse, PlainTextResponse
+from fastapi.responses import PlainTextResponse
 
 import config
 import document
@@ -51,17 +51,6 @@ INDEX = config.ELASTIC_INDEX
 
 app = FastAPI()
 
-'''
-@app.exception_handler(Exception)
-async def internal_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "status": 500,
-            "message": "Internal Server Error",
-            "stack":traceback.format_exception(*sys.exc_info()),
-            "details": {"details?": "none"}})
-'''
 
 @app.exception_handler(Exception)
 async def python_exception_handler(request: Request, exc: Exception):

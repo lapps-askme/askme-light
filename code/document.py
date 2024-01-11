@@ -101,4 +101,4 @@ class DocumentSet:
 					terms[term[0]][0] += term[1]
 					terms[term[0]][1] += term[2]
 		return list(reversed(sorted(
-				[(tfidf, freq, term) for term, (freq, tfidf) in terms.items()])))
+				[(term, freq, tfidf) for term, (freq, tfidf) in terms.items()])))
