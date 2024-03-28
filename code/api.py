@@ -133,7 +133,7 @@ def get_set(ids: str):
     return {
         "query": { "index": INDEX, "ids": ids },
         "documents": doc_set.documents,
-        "terms": doc_set.get_terms() }
+        "terms": doc_set.sorted_terms() }
 
 @app.get('/api/doc/{doc_id}')
 def get_document(doc_id: str, pretty: bool = False):
