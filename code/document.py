@@ -11,8 +11,7 @@ class Document():
 		self.identifier = hit['_id']
 		self.score = hit.get('_score', 0)
 		self.nscore = hit.get('_score', 0)
-		# TODO: database should not have topic but domain field
-		self.domain = hit['_source'].get('topic')
+		self.tags = hit['_source'].get('tags')
 		self.year = hit['_source'].get('year')
 		self.title = hit['_source'].get('title', '')
 		self.url = hit['_source'].get('url', '')
@@ -65,7 +64,7 @@ class Document():
 			('year', self.year),
 			('url', f'<a href="{self.url}">{self.url}</a>'),
 			('authors', self.authors),
-			('domain', self.domain),
+			('tags', self.tags),
 			('summary', self.summary) ]
 
 

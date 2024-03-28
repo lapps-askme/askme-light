@@ -15,13 +15,35 @@ $ pip install fastapi uvicorn flask
 $ pip install pygments
 ```
 
-Starting the ElasticSearch document database (this can take up to a few dozen seconds):
+You need an ElasticSearch database. Given an ElasticSearch image and a local data directory you can start the ElasticSearch document database as follows (this can take up to a few dozen seconds):
 
 ```bash
 $ docker run -d --rm -p 9200:9200 \
 	-v /Users/Shared/data/elasticsearch/data/:/data --user elasticsearch elastic
 ```
+
 See below for more details on how to create the Elastic image and populate the database.
+
+
+### Configuration
+
+To change the configuration edit `code/config.py`. Most settings are just defaults that we thought make sense. But you may need to change the settings that reflect your local ElasticSearch set up:
+
+```python
+ELASTIC_HOST = 'localhost'
+ELASTIC_PORT = 9200
+ELASTIC_INDEX = 'xdd'
+ELASTIC_USER = 'askme'
+ELASTIC_PASSWORD = 'pw-askme'
+```
+
+There are also a couple of settings that make the API sensitive to what properties are in the database. Unfortunately, most of them cannot be edited without some extract work, but it is possible to edit one of them:
+
+```python
+SEARCH_FIELDS = ('title', 'abstract', 'content')
+```
+
+This defines what fields are searched when querying the database. If the 'content' field has a different name like 'text' or 'body' then you can change that here.
 
 
 ### Running
@@ -41,6 +63,15 @@ $ python app.py
 The Flask application will never look spiffy, it is just there for development purposes.
 
 When you want to use this API from the production AskMe webpage you need to start the Next.js site implemented in [https://github.com/lappsgrid-incubator/askme-web-next](https://github.com/lappsgrid-incubator/askme-web-next).
+
+
+### Running the API in Docker
+
+To create a Dockerimage for the API do:
+
+```bash
+$ docker build -t askme-api -f docker/Dockerfile-api .
+```
 
 
 ### Setting up ElasticSearch

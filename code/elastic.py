@@ -38,6 +38,10 @@ def get_document(doc_id: str):
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query)
     return SearchResult(result)
 
+def get_raw_document(doc_id: str):
+    query = {'match': {'_id': doc_id}}
+    return ES.search(index=INDEX, size=config.MAX_RESULTS, query=query)
+
 def get_documents(doc_ids: list):
     result = ES.mget(
         index=INDEX,
@@ -45,15 +49,19 @@ def get_documents(doc_ids: list):
         source_excludes=['abstract', 'text'])
     return SearchResult(result)
 
-def search(domains: list, term: str, type: str=None, page: int=1):
+def search(tags: list, term: str, type: str=None, page: int=1):
     # TODO: 'term' could be multiple tokens and the search is now a disjunction
     # Using "must" instead of "should". With the latter, documents with scores
     # of zero were making it into the response.
     query = {
         "bool": {
             "must": {
-                "multi_match": {"query": term, "fields": config.SEARCH_FIELDS, "type": "phrase" if type == "exact" else "best_fields"}},
-            "filter": {"terms": {"topic": domains} } if domains else None}}
+                "multi_match": {
+                    "query": term,
+                    "fields": config.SEARCH_FIELDS,
+                    "type": "phrase" if type == "exact" else "best_fields"}},
+            "filter": {
+                "terms": {"tags": tags} } if tags else None}}
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)
@@ -125,19 +133,19 @@ class ElasticErrorDetails:
         pprint.pprint(simplified, indent=2)
 
 
-def test(domain: str, term: str):
-    result = search(domain, term)
+def test(tags: str, term: str):
+    result = search(tags, term)
     for n, doc in enumerate(result.hits):
-        print(f'{n+1:2}  {doc.identifier}  {doc.score:7.4f}  {doc.domain[:3]}  {doc.title[:75]}')
+        print(f'{n+1:2}  {doc.identifier}  {doc.score:7.4f}  {doc.tags[:3]}  {doc.title[:75]}')
 
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--domain", default=None, help="domain, None by default" )
+    parser.add_argument("--tags", default=None, help="tags, None by default" )
     parser.add_argument("--query", help="query")
     args = parser.parse_args()
 
     if args.query:
-        test(args.domain, args.query)
+        test(args.tags, args.query)

@@ -7,6 +7,11 @@ $ curl http:/127.0.0.1:8000/api/doc/54b4324ee138239d8684aeb2
 $ curl http:/127.0.0.1:8000/api/doc/54b4324ee138239d8684aeb2?pretty=true
 $ curl http:/127.0.0.1:8000/api/doc/54b4324ee138239d8684aeb2/title
 
+Get a document, but now just the raw result from ElasticSearch:
+
+$ curl http:/127.0.0.1:8000/api/rawdoc/54b4324ee138239d8684aeb2
+$ curl http:/127.0.0.1:8000/api/rawdoc/54b4324ee138239d8684aeb2?pretty=true
+
 Get a list of documents:
 
 $ curl http://localhost:8000/api/set?ids=5783bcafcf58f176c768f5cc,58102ca2cf58f15425a75367
@@ -20,14 +25,15 @@ Searching for a term:
 
 $ curl -X POST "http:/127.0.0.1:8000/api/question?query=flu"
 
-Restricting the search to a domain:
+Restricting the search to the specified list of tags:
 
-$ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu"
+$ curl -X POST "http:/127.0.0.1:8000/api/question?tags=biomedical&query=flu"
+$ curl -X POST "http:/127.0.0.1:8000/api/question?tags=biomedical,mars&query=flu"
 
 Getting the second page for a search:
 
 $ curl -X POST "http:/127.0.0.1:8000/api/question?query=flu&page=2"
-$ curl -X POST "http:/127.0.0.1:8000/api/question?domain=biomedical&query=flu&page=2"
+$ curl -X POST "http:/127.0.0.1:8000/api/question?tags=biomedical&query=flu&page=2"
 
 """
 
@@ -80,17 +86,17 @@ def error():
     raise AskmeException(message="The endpoint /api/error always raises an exception")
 
 @app.post('/api/question')
-def query(domains: str=None, query: str=None, type=None, page: int=1):
+def query(tags: str = None, query: str = None, type = None, page: int=1):
     """Search endpoint for the current web interface."""
     # if page number is larger than MAX_PAGES or less than 1, default to 1
     if page > config.MAX_PAGES or page < 1:
         page = 1
-    # create a list from domains string
-    if domains:
-        domains = domains.split(',')
+    # create a list from the tags string
+    if tags:
+        tags = tags.split(',')
     if DEBUG:
-        print({"domains": domains, "question": query[:50], "page": page})
-    result = elastic.search(domains, query, type, page)
+        print({"tags": tags, "question": query[:50], "page": page})
+    result = elastic.search(tags, query, type, page)
     result.hits = ranking.rerank(result.docs)
     if DEBUG:
         print('>>>', result)
@@ -142,6 +148,14 @@ def get_document(doc_id: str, pretty: bool = False):
     else:
         return {}
 
+@app.get('/api/rawdoc/{doc_id}')
+def get_raw_document(doc_id: str, pretty: bool = False):
+    """Return the raw Elasticsearch response for the document query."""
+    result = elastic.get_raw_document(doc_id)
+    if pretty:
+        result = prettify(result.body)
+    return result
+
 @app.get('/api/doc/{doc_id}/{field}')
 def get_field(doc_id: str, field: str):
     """Return the value of the field for the document as a field:value pair. Returns
@@ -149,6 +163,7 @@ def get_field(doc_id: str, field: str):
     field does not exist."""
     result = elastic.get_document(doc_id)
     if result.total_hits > 0:
-        return {field: getattr(result.hits[0], field)}
+        doc = result.docs[0]
+        return {field: getattr(doc, field, None)} 
     else:
         return {}

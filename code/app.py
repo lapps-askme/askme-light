@@ -14,12 +14,12 @@ debug = False
 @app.route("/")
 def index():
     t0 = time.time()
-    domain = request.args.get("domain", '')
+    tags = request.args.get("tags", '')
     term = request.args.get("term", '')
     result = None
     docs = []
     if term:
-        result = elastic.search(domain, term)
+        result = elastic.search(tags, term)
         docs = result.hits
         docs = ranking.rerank(docs)
     #print(f'Elapsed time: {time.time()-t0:.2f} seconds')
@@ -28,7 +28,7 @@ def index():
     #for x in request.args:
     #    print(request.args.getlist(x))
     return render_template(
-        'index.html', domains=config.DOMAINS, domain=domain, term=term,
+        'index.html', tags=config.TAGS, tags=tags, term=term,
         result=result, docs=docs, request=request, debug=debug)
 
 @app.route("/document")

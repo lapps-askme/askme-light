@@ -14,10 +14,10 @@ ES = Elasticsearch(
 INDEX = config.ELASTIC_INDEX
 
 
-def search(domain: str = None, term: str = None, query: str = None, page: int = 1):
+def search(tags: str = None, term: str = None, query: str = None, page: int = 1):
     """New search function for elastic.py."""
     # TODO: 'term' could be multiple tokens and the search is now a disjunction
-    if not domain:
+    if not tags:
         query = {'multi_match': {'query': term, "fields": config.SEARCH_FIELDS}}
     else:
         # Using "must" instead of "should". With the latter, documents with scores
@@ -26,7 +26,7 @@ def search(domain: str = None, term: str = None, query: str = None, page: int = 
             "bool": {
                 "must": {
                     "multi_match": {"query": term, "fields": config.SEARCH_FIELDS}},
-                "filter": {"term": {"topic": domain} }}}
+                "filter": {"term": {"tags": tags} }}}
     # offset for documents returned
     skip = config.MAX_RESULTS * (page - 1)
     result = ES.search(index=INDEX, size=config.MAX_RESULTS, query=query, from_=skip)
@@ -37,7 +37,7 @@ class Query:
 
     """This builds the kind of query that we used before.
 
-    domain  -  a string denoting the domain
+    tags    -  a string denoting tags
     terms   -  the query terms
     phrase  -  True if the terms should be considered a phrase
     must    -  True if this is a boolean "must" query
@@ -50,10 +50,10 @@ class Query:
 
     """
 
-    def __init__(self, query: str, domain: str = None,
+    def __init__(self, query: str, tags: str = None,
                  phrase: bool = False, must: bool = False, should: bool = False):
         self.terms = query
-        self.domain = domain
+        self.tags = tags
         self.must = must
         self.should = should
         self.fields = config.SEARCH_FIELDS
@@ -63,15 +63,15 @@ class Query:
     def __str__(self):
         must = ' must' if self.must else ''
         should = ' should' if self.should else ''
-        return f'<Query "{self.terms}" domain="{self.domain}"{must}{should}">'
+        return f'<Query "{self.terms}" tags="{self.tags}"{must}{should}">'
 
     def is_valid(self):
         return self.query is not None
 
     def build(self):
-        if self.domain:
-            domain_filter = {"term": {"topic": self.domain}}
-            self.query["bool"]["filter"].append(domain_filter)
+        if self.tags:
+            tags_filter = {"term": {"tags": self.tags}}
+            self.query["bool"]["filter"].append(tags_filter)
         if self.must or self.should:
             leaf_query = {"multi_match": {"query": self.terms, "fields": self.fields}}
             # this keeps open the option that there is both a must and a should
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--terms", help="the query terms")
-    parser.add_argument("--domain", default=None, help="domain, None by default" )
+    parser.add_argument("--tags", default=None, help="tags, None by default" )
     parser.add_argument("--must", action='store_true', help="boolean must query")
     parser.add_argument("--should", action='store_true', help="boolean should query")
     parser.add_argument("--page", default=0, type=int, help="what page of the results to show" )
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     print(args)
 
     start_hit = args.page * 20
-    query = Query(args.terms, domain=args.domain, must=args.must, should=args.should)
+    query = Query(args.terms, tags=args.tags, must=args.must, should=args.should)
     print(query)
     print(json.dumps(query.query, indent=2))
 
@@ -102,5 +102,5 @@ if __name__ == '__main__':
         print(f'\nTotal hits: {result["hits"]["total"]["value"]}')
         for hit in result['hits']['hits']:
             score = f'{hit["_score"]:2.4f}'
-            domain = hit["_source"]["topic"][:3]
-            print(f'{hit["_id"]}  {score:>7s}  {domain}  {hit["_source"]["title"][:100]}')
+            tags = hit["_source"]["tags"][:3]
+            print(f'{hit["_id"]}  {score:>7s}  {tags}  {hit["_source"]["title"][:100]}')
