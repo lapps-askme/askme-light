@@ -7,8 +7,9 @@ ELASTIC_INDEX = 'xdd'
 ELASTIC_USER = 'askme'
 ELASTIC_PASSWORD = 'pw-askme'
 
-# List of domains to display in the interface
-DOMAINS = ('biomedical', 'geoarchive', 'molecular_physics')
+# List of tags to display in the Flask interface, this is not used by the
+# React website and is not as up-to-date.
+TAGS = ('biomedical', 'geoarchive', 'molecular_physics')
 
 # Number of tokens we allow in the summary, set to a number that keeps processing
 # of a query below 0.5 seconds.
@@ -28,16 +29,18 @@ MAX_RESULTS = 20
 MAX_PAGES = 40
 
 # Fields to search when doing a basic text search
-SEARCH_FIELDS = ('title', 'abstract', 'text')
+SEARCH_FIELDS = ('title', 'abstract', 'content')
 
-# List of fields to be included in the document when the API requests it
-# This is used when multiple documents are returned.
-FIELDS_FOR_MULTIPLE_DOCS = (
-	'identifier', 'score', 'nscore', 'domain', 'year', 'title', 'url',
-	'authors', 'summary')
+# Fields to include in the return document(s). Do not change these unless you know what 
+# you are doing and know how to change code in document.py.
+RETURN_FIELDS = ('identifier', 'tags', 'year', 'title', 'url', 'authors', 'summary')
+
+# List of fields to be included in the document when the API requests it. This is
+# used when multiple documents are returned. Do not change these unless you know what 
+# you are doing and know how to change code in document.py.
+FIELDS_FOR_MULTIPLE_DOCS = RETURN_FIELDS + ('score', 'nscore')
 
 # List of all fields to includes when you request a single document. The scores
-# become irrelevant, but terms and entities are added.
-FIELDS_FOR_SINGLE_DOC = (
-	'identifier', 'domain', 'year', 'title', 'url',
-	'authors', 'summary', 'terms', 'entities')
+# become irrelevant, but terms are added. Do not change these unless you know what 
+# you are doing and know how to change code in document.py.
+FIELDS_FOR_SINGLE_DOC = RETURN_FIELDS + ('terms',)

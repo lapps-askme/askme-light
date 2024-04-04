@@ -11,8 +11,7 @@ class Document():
 		self.identifier = hit['_id']
 		self.score = hit.get('_score', 0)
 		self.nscore = hit.get('_score', 0)
-		# TODO: database should not have topic but domain field
-		self.domain = hit['_source'].get('topic')
+		self.tags = hit['_source'].get('tags')
 		self.year = hit['_source'].get('year')
 		self.title = hit['_source'].get('title', '')
 		self.url = hit['_source'].get('url', '')
@@ -65,7 +64,7 @@ class Document():
 			('year', self.year),
 			('url', f'<a href="{self.url}">{self.url}</a>'),
 			('authors', self.authors),
-			('domain', self.domain),
+			('tags', self.tags),
 			('summary', self.summary) ]
 
 
@@ -80,6 +79,13 @@ class DocumentSet:
 
 	def __init__(self, documents):
 		self.documents = documents
+		self.terms = {}
+		for doc in self.documents:
+			for term in doc.terms:
+				if not term[0] in self.terms:
+					self.terms[term[0]] = [0,0]
+					self.terms[term[0]][0] += term[1]
+					self.terms[term[0]][1] += term[2]
 
 	def __len__(self):
 		return len(self.documents)
@@ -87,18 +93,6 @@ class DocumentSet:
 	def __str__(self):
 		return f'<DocumentSet with {len(self)} documents>'
 
-	def get_terms(self):
-		"""To get the terms of a set, with their frequencies and TFIDF scores, we
-		just collect all of them and sum the frequencies and TFIDF scores. This
-		definitely makes sense for the frequencies, but for the TFIDF scores we do
-		end up with something that is not really a TFIDF score. The resulting list
-		of (TFIDF, frequency, term) tuple is sorted on TFIDF scores."""
-		terms = {}
-		for doc in self.documents:
-			for term in doc.terms:
-				if not term[0] in terms:
-					terms[term[0]] = [0,0]
-					terms[term[0]][0] += term[1]
-					terms[term[0]][1] += term[2]
-		return list(reversed(sorted(
-				[(term, freq, tfidf) for term, (freq, tfidf) in terms.items()])))
+	def sorted_terms(self):
+		terms = [(term, freq, tfidf) for term, (freq, tfidf) in self.terms.items()]
+		return list(sorted(terms, key=itemgetter(2), reverse=True))
