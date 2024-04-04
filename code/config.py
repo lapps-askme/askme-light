@@ -1,14 +1,14 @@
 # Basic ElasticSearch information, edit as needed.
 ELASTIC_HOST = 'localhost'
 ELASTIC_PORT = 9200
-ELASTIC_INDEX = 'xdd2'
+ELASTIC_INDEX = 'xdd'
 
 # Edit as needed. The askme user should at least have the viewer role.
 ELASTIC_USER = 'askme'
 ELASTIC_PASSWORD = 'pw-askme'
 
 # List of tags to display in the Flask interface, this is not used by the
-# React website.
+# React website and is not as up-to-date.
 TAGS = ('biomedical', 'geoarchive', 'molecular_physics')
 
 # Number of tokens we allow in the summary, set to a number that keeps processing
