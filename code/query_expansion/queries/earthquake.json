@@ -1,0 +1,28 @@
+{
+    "query": {
+        "bool": {
+            "should": [
+                {"multi_match": {
+                    "fields": ["title", "abstract", "text"],
+                    "query": "earthquake",
+                    "type": "phrase"}},
+                {"multi_match": {
+                    "fields": ["title", "abstract", "text"],
+                    "query": "techtonic activity",
+                    "type": "phrase"}},
+                {"bool": {
+                    "must": [
+                        {"multi_match": {
+                            "fields": ["title", "abstract", "text"],
+                            "query": "shock",
+                            "type": "phrase"}},
+                        {"bool": {
+                            "must_not": [
+                                {"multi_match": {
+                                    "fields": ["title", "abstract", "text"],
+                                    "query": "emotional",
+                                    "type": "phrase"}}]}}]}}
+            ]
+        }
+    }
+}

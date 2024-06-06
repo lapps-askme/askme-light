@@ -3,3 +3,4 @@
 venv
 backup.sh
 .DS_Store
+code/query_expansion/out
