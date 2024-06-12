@@ -3,11 +3,121 @@
 Defines a QueryBuilder class which is initiated with query term, but which
 can then be expanded using a variety of query specifications.
 
+Requirements:
+
+$ pip install elasticsearch
+
 """
 
+import re
 import json
 import pprint
 import textwrap
+import elasticsearch
+from utils import dict_generator, highlight
+
+
+# Making this standalone for now so copied settings from the configuration file
+
+ELASTIC_HOST = 'localhost'
+ELASTIC_PORT = 9200
+ELASTIC_INDEX = 'xdd'
+ELASTIC_USER = 'askme'
+ELASTIC_PASSWORD = 'pw-askme'
+
+
+MAX_HITS = 20
+
+
+ES = elasticsearch.Elasticsearch(
+        [f'http://{ELASTIC_HOST}:{ELASTIC_PORT}'],
+        basic_auth=(ELASTIC_USER, ELASTIC_PASSWORD))
+
+
+
+class Result:
+
+    def __init__(self, query: dict):
+        self.query = query
+        self.result = ES.search(index=ELASTIC_INDEX, size=MAX_HITS, query=query)
+        self.hits = [Hit(hit) for hit in self.result['hits']['hits']]
+
+    def __str__(self):
+        return f'<Result query_terms={len(self.qterms())} hits={len(self)}>'
+
+    def __len__(self):
+        return len(self.hits)
+
+    def __getitem__(self, i):
+        return self.hits[i]
+
+    def qterms(self):
+        qterms = []
+        for l in dict_generator(self.query):
+            if l[-2] == 'query':
+                qterms.append(l[-1])
+        return qterms
+
+    def pp_terms(self):
+        terms = ' '.join([f'"{qt}"' for qt in self.qterms()])
+        print(f'\n<QueryTerms {terms}>')
+
+    def pp_query(self):
+        print(json.dumps(self.query, indent=2))
+
+    def pp_titles(self):
+        print('\nHits with scores and titles\n')
+        for n, hit in enumerate(self):
+            title = highlight(hit.title[:120], self.qterms())
+            print(f"{n+1:2}  {hit.score:>5.2f}  {title}")
+        print()
+
+    def pp_abstracts(self):
+        for n, hit in enumerate(self):
+            title = highlight(hit.title[:120], self.qterms())
+            print(f"{n+1:2}  {hit.score:>5.2f}  {title}")
+            hit.pp_abstract(indent='    ', skip='\n', words=self.qterms())
+            if n + 1 < len(self):
+                answer = input('? Hit enter for next abstract: ')
+                if answer == 'q':
+                    break
+                print()
+
+    def pp_all(self):
+        for n, hit in enumerate(self):
+            title = highlight(hit.title[:120], self.qterms())
+            print(f"\n{n+1:2}  {hit.score:>5.2f}  {title}")
+            hit.pp_abstract(indent='    ', skip='\n', words=self.qterms())
+            hit.pp_text(indent='    ', skip='\n', words=self.qterms())
+            if n + 1 < len(self):
+                answer = input('? Hit enter for next abstract: ')
+                if answer == 'q':
+                    break
+                print()
+
+
+class Hit:
+
+    def __init__(self, hit: dict):
+        self.hit = hit
+        self.score = self.hit['_score']
+        self.title = self.hit['_source']['title']
+        self.abstract = self.hit['_source']['abstract']
+        self.text = self.hit['_source']['text']
+
+    def pp_abstract(self, skip='', indent='', words=None):
+        self.pp_field(self.abstract, skip=skip, indent=indent, words=words)
+
+    def pp_text(self, skip='', indent='', words=None):
+        self.pp_field(self.text, skip=skip, indent=indent, words=words)
+
+    def pp_field(self, field, skip='', indent='', words=None):
+        text = textwrap.fill(
+            field, 120, initial_indent=indent, subsequent_indent=indent)
+        if words is not None:
+            text = highlight(text, words)
+        print(f'{skip}{text}{skip}')
+
 
 
 class QuerySpecification:
@@ -112,6 +222,9 @@ class Boolean:
             obj["bool"]["should"] = [x.json() for x in self.should]
         return obj
 
+    def formula(self):
+        raise NotImplementedError
+
 
 class And(Boolean):
 
@@ -207,30 +320,42 @@ class Query:
         print(self.formula())
 
 
-
 def save_query(q: dict, outfile: str):
     with open(outfile, 'w') as fh:
         fh.write(json.dumps(q.json(), indent=2))
 
 
+def example1():
+    qb = QueryBuilder("earthquake")
+    qb.exclude_documents('d1', 'd2', 'd4')
+    qb.include_documents('d3', 'd6')
+    qb.include_terms('techtonic activity')
+    qb.exclude_terms('shock')
+    #qb.include_terms('head cold')
+    #qb.add_synonyms('head cold', ('Rhinitis', 'upper respiratory infection'))
+    qb.pp()
+    save_query(qb.query, 'example.json')
+    result = Result(qb.query.json())
+    print(result)
 
-if __name__ == '__main__':
 
+def example2():
     q = Or(
             QTerm('earthquake'),
             QTerm('techtonic activity'),
             And(
                 QTerm('shock'),
                 Not(QTerm('emotional'))))
-    #print(q.formula())
-    #save_query(q, 'example.json')
+    print(f'\n{q.formula()}')
+    result = Result(q.json())
+    print(f'\n{result}')
+    #result.pp_terms()
+    result.pp_titles()
+    #result.pp_abstracts()
+    #result.pp_all()
 
-    qb = QueryBuilder("earthquake")
-    qb.exclude_documents('d1', 'd2', 'd4')
-    qb.include_documents('d3', 'd6')
-    qb.include_terms('techtonic activity')
-    qb.exclude_terms('shock')
-    qb.include_terms('head cold')
-    qb.add_synonyms('head cold', ('Rhinitis', 'upper respiratory infection'))
-    qb.pp()
-    save_query(qb.query, 'example.json')
+
+if __name__ == '__main__':
+
+    example1()
+    #example2()
