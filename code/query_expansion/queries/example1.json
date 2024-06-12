@@ -1,0 +1,17 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "city": "x" } },
+        { "match": { "school": "y" } },
+        { "match": { "age": 12 } },
+        {
+          "bool": {
+            "should": [
+              { "term": { "team": "A" } },
+              { "term": { "team": "B" } } ] }
+        }
+      ]
+    }
+  }
+}

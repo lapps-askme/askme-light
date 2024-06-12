@@ -12,7 +12,7 @@ discovery.type: single-node
 No security is set up here and in ElasticSearch 7 security is not turned on out-of-the-box, and when checking the security settings you will see that security is indeed not enabled:
 
 ```
-$ curl -X GET -u username:password "http://localhost:9200/_xpack?pretty
+$ curl -X GET -u username:password "http://localhost:9200/_xpack?pretty"
 ...
     "security" : {
       "available" : true,
@@ -98,6 +98,8 @@ See [https://www.elastic.co/guide/en/elasticsearch/reference/current/built-in-ro
 
 Also see:
 
+- [https://www.elastic.co/guide/en/elasticsearch/reference/7.16/configuring-stack-security.html](https://www.elastic.co/guide/en/elasticsearch/reference/7.16/configuring-stack-security.html)
+- [https://www.elastic.co/guide/en/elasticsearch/reference/7.16/security-minimal-setup.html](https://www.elastic.co/guide/en/elasticsearch/reference/7.16/security-minimal-setup.html)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/field-and-document-access-control.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/field-and-document-access-control.html)

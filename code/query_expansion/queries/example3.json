@@ -1,0 +1,21 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {"bool": {
+          "should": [
+            {"bool": {
+              "must": [
+                {"match": {"description": "great"}},
+                {"match": {"description": "orange"}}]}},
+          {"match": {"description": "popular"}}]}},
+        {"bool": {
+          "must_not": [
+            {"match": {"description": "poor"}}]}},
+        {"bool": {
+          "should": [
+            {"match": {"city": "London"}},
+            {"match": {"city": "Paris"}}]}}]}},
+  "size": 20,
+  "from": 0
+}
