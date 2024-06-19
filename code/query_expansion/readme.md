@@ -6,10 +6,10 @@ Some code to play with amending and expanding a query.
 
 Should definitely run on Python version 3.11 and up, probably on any version larger than 3.8.
 
-Modules needed:
+Modules needed (earlier and later versions probably work as well):
 
 ```bash
-$ pip install elasticsearch
+$ pip install elasticsearch==8.14.0
 ```
 
 Assumes that an ElasticSearch database is running with the following settings:

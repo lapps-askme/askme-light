@@ -1,4 +1,9 @@
 import re
+import datetime
+
+
+def timestamp():
+    return datetime.datetime.now()
 
 
 # https://stackoverflow.com/questions/12507206/how-to-completely-traverse-a-complex-dictionary-of-unknown-depth#12507546
